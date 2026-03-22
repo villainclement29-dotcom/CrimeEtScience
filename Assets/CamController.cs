@@ -4,123 +4,133 @@ using TMPro;
 
 public class PhotoCameraController : MonoBehaviour
 {
-    [Header("Réglage des Limites")]
-    [Tooltip("Glisse ici l'image de décor qui sert de fond")]
-    public SpriteRenderer backgroundSprite;
-
-    [Header("Déplacement")]
+    [Header("Réglages")]
     public float moveSpeed = 5f;
-
-    [Header("Zoom")]
     public float zoomSpeed = 5f;
-    public float minZoom = 2f;
-    public float maxZoom = 5f; // Réduit un peu pour éviter de sortir du cadre trop vite
+    public float minZoom = 1.5f;
+    public float maxZoom = 4f;
 
-    [Header("Détection Photo")]
+    [Header("Détection")]
     public float detectionRadius = 0.5f;
     public Color successColor = Color.green;
 
     private Camera cam;
+    private PlayerInput playerInput;
+    private SpriteRenderer backgroundSprite;
     private Vector2 moveInput;
     private float zoomInput;
 
-    void Start()
+    void Awake()
     {
         cam = GetComponent<Camera>();
+        playerInput = GetComponent<PlayerInput>();
         
-        if (backgroundSprite == null)
-        {
-            Debug.LogError("<color=red>⚠ ERREUR :</color> Tu as oublié de glisser l'image de fond dans l'Inspector !");
+        // LOG DE DÉBUG INITIAL
+        Debug.Log("<color=white>ÉVEIL : Script attaché sur " + gameObject.name + "</color>");
+
+        // Activation obligatoire des écrans secondaires au démarrage global
+        if (Display.displays.Length > 1) {
+            Display.displays[1].Activate();
+            Debug.Log("<color=orange>SYSTÈME : Écran secondaire détecté et activé.</color>");
         }
     }
 
-    // --- ENTRÉES (Player Input) ---
-
-    public void OnMove(InputValue value) => moveInput = value.Get<Vector2>();
-    
-    public void OnZoom(InputValue value)
+    void Start()
     {
-        // On récupère le Vector2 et on utilise l'axe Y
-        Vector2 inputVector = value.Get<Vector2>();
-        zoomInput = inputVector.y;
+        int id = playerInput.playerIndex; 
+        Debug.Log("<color=cyan>JOUEUR RECONNU : ID = " + id + "</color>");
+
+        // --- GESTION DES DISPLAYS (ÉCRANS) ---
+        if (id == 0) 
+        {
+            cam.targetDisplay = 0; // Display 1
+            Debug.Log("<color=green>[J0]</color> Configuré sur DISPLAY 1");
+        } 
+        else if (id == 1) 
+        {
+            cam.targetDisplay = 1; // Display 2
+            Debug.Log("<color=blue>[J1]</color> Configuré sur DISPLAY 2");
+        }
+
+        // --- RECHERCHE DU FOND ---
+        string targetBG = (id == 0) ? "Background_P1" : "Background_P2";
+        GameObject bgObj = GameObject.Find(targetBG);
+        if (bgObj != null) {
+            backgroundSprite = bgObj.GetComponent<SpriteRenderer>();
+            Debug.Log("<color=green>[J" + id + "]</color> Fond lié avec succès : " + targetBG);
+        } else {
+            Debug.LogError("[J" + id + "] ERREUR CRITIQUE : Impossible de trouver " + targetBG + " dans la scène !");
+        }
+
+        AssignTextsToIndices();
     }
-
-    public void OnPhoto() => CheckPhotoValidation();
-
-    // --- LOGIQUE ---
 
     void Update()
     {
-        if (backgroundSprite == null) return;
-
-        // 1. GESTION DU ZOOM
-        if (Mathf.Abs(zoomInput) > 0.01f)
-        {
-            float targetSize = cam.orthographicSize - (zoomInput * zoomSpeed * Time.deltaTime);
-            cam.orthographicSize = Mathf.Clamp(targetSize, minZoom, maxZoom);
+        // On lit les inputs directement via le PlayerInput
+        if (playerInput != null) {
+            moveInput = playerInput.actions["Move"].ReadValue<Vector2>();
+            zoomInput = playerInput.actions["Zoom"].ReadValue<Vector2>().y;
+            
+            if (playerInput.actions["Photo"].triggered) {
+                Debug.Log("<color=yellow>[J" + playerInput.playerIndex + "] TOUCHE PHOTO PRESSÉE</color>");
+                CheckPhotoValidation();
+            }
         }
 
-        // 2. CALCUL DES LIMITES DYNAMIQUES
-        // Taille du sprite de fond
-        float bgWidth = backgroundSprite.bounds.size.x;
-        float bgHeight = backgroundSprite.bounds.size.y;
-        Vector3 bgPos = backgroundSprite.transform.position;
+        if (backgroundSprite == null) return;
 
-        // Ce que la caméra voit actuellement (dépend du zoom)
+        // --- MOUVEMENT ---
+        if (moveInput != Vector2.zero) {
+            ApplyMovement();
+        }
+    }
+
+    void ApplyMovement()
+    {
+        // Zoom
+        cam.orthographicSize = Mathf.Clamp(cam.orthographicSize - (zoomInput * zoomSpeed * Time.deltaTime), minZoom, maxZoom);
+
+        // Limites
         float camHeight = cam.orthographicSize;
         float camWidth = camHeight * cam.aspect;
+        Bounds b = backgroundSprite.bounds;
 
-        // Calcul des points d'arrêt pour que les bords de la cam ne dépassent pas le décor
-        float minX = bgPos.x - (bgWidth / 2f) + camWidth;
-        float maxX = bgPos.x + (bgWidth / 2f) - camWidth;
-        float minY = bgPos.y - (bgHeight / 2f) + camHeight;
-        float maxY = bgPos.y + (bgHeight / 2f) - camHeight;
+        float minX = b.min.x + camWidth;
+        float maxX = b.max.x - camWidth;
+        float minY = b.min.y + camHeight;
+        float maxY = b.max.y - camHeight;
 
-        // 3. DÉPLACEMENT ET SÉCURITÉ
-        Vector3 newPos = transform.position + (Vector3)moveInput * moveSpeed * Time.deltaTime;
+        Vector3 nextPos = transform.position + (Vector3)moveInput * moveSpeed * Time.deltaTime;
+        nextPos.x = (minX > maxX) ? b.center.x : Mathf.Clamp(nextPos.x, minX, maxX);
+        nextPos.y = (minY > maxY) ? b.center.y : Mathf.Clamp(nextPos.y, minY, maxY);
 
-        // Si l'image est plus petite que la vue (trop dézoomé), on centre sur l'axe concerné
-        if (minX > maxX) newPos.x = bgPos.x;
-        else newPos.x = Mathf.Clamp(newPos.x, minX, maxX);
+        transform.position = new Vector3(nextPos.x, nextPos.y, transform.position.z);
+    }
 
-        if (minY > maxY) newPos.y = bgPos.y;
-        else newPos.y = Mathf.Clamp(newPos.y, minY, maxY);
-
-        transform.position = new Vector3(newPos.x, newPos.y, transform.position.z);
-
-        // Debug Clavier (E)
-        if (Keyboard.current.eKey.wasPressedThisFrame) CheckPhotoValidation();
+    void AssignTextsToIndices()
+    {
+        TextMeshProUGUI[] allTexts = GetComponentsInChildren<TextMeshProUGUI>(true);
+        HintObject[] allIndices = Object.FindObjectsByType<HintObject>(FindObjectsSortMode.None);
+        foreach (HintObject indice in allIndices) {
+            foreach (TextMeshProUGUI txt in allTexts) {
+                if (txt.text.ToLower().Contains(indice.hintName.ToLower())) {
+                    indice.linkedText = txt;
+                    Debug.Log("<color=white>[J" + playerInput.playerIndex + "] Texte lié : " + indice.hintName + "</color>");
+                }
+            }
+        }
     }
 
     void CheckPhotoValidation()
     {
-        Debug.Log("📸 Photo prise !");
-        
-        Vector2 rayOrigin = new Vector2(transform.position.x, transform.position.y);
-        RaycastHit2D hit = Physics2D.CircleCast(rayOrigin, detectionRadius, Vector2.zero);
-
-        if (hit.collider != null)
-        {
-            if (hit.collider.CompareTag("hint"))
-            {
-                HintObject hint = hit.collider.GetComponent<HintObject>();
-                if (hint != null)
-                {
-                    Debug.Log("<color=green>✅ Indice trouvé : </color>" + hint.hintName);
-                    hint.OnFound(successColor);
-                }
-            }
-            else
-            {
-                Debug.Log("Objet touché : " + hit.collider.name + " (n'est pas un indice)");
+        RaycastHit2D hit = Physics2D.CircleCast(transform.position, detectionRadius, Vector2.zero);
+        if (hit.collider != null && hit.collider.CompareTag("hint")) {
+            HintObject h = hit.collider.GetComponent<HintObject>();
+            if (h != null) {
+                Debug.Log("<color=green>PHOTO VALIDE !</color>");
+                h.OnFound(successColor);
             }
         }
-    }
-
-    // Affiche le cercle de détection rouge dans la vue SCENE
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, detectionRadius);
     }
 }

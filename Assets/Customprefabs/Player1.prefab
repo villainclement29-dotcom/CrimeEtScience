@@ -351,7 +351,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acfad95c5e7e4a246885205e7181da44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backgroundSprite: {fileID: 0}
   moveSpeed: 5
   zoomSpeed: 2
   minZoom: 1
@@ -372,7 +371,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Actions: {fileID: -944628639613478452, guid: dd18150de289c1341ab19666d6cc045d,
     type: 3}
-  m_NotificationBehavior: 0
+  m_NotificationBehavior: 2
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
     m_PersistentCalls:
@@ -383,12 +382,24 @@ MonoBehaviour:
   m_ControlsChangedEvent:
     m_PersistentCalls:
       m_Calls: []
-  m_ActionEvents: []
-  m_NeverAutoSwitchControlSchemes: 0
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: ec98b00a-a2ad-4384-82ad-616122e9b226
+    m_ActionName: 'player/move[/XInputControllerWindows/leftStick]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: d78fdc00-201f-4376-a4e8-432dbe6ee9c6
+    m_ActionName: 'player/zoom[/XInputControllerWindows/rightStick]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 8c044cb1-4dbd-4f88-b357-e40e8b6cbd0e
+    m_ActionName: 'player/Photo[/XInputControllerWindows/buttonSouth]'
+  m_NeverAutoSwitchControlSchemes: 1
   m_DefaultControlScheme: Manette
   m_DefaultActionMap: player
   m_SplitScreenIndex: -1
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 2552209420196635279}
 --- !u!1 &3146144455334011153
 GameObject:
   m_ObjectHideFlags: 0
