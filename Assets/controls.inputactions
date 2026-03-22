@@ -14,6 +14,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "zoom",
+                    "type": "Value",
+                    "id": "d78fdc00-201f-4376-a4e8-432dbe6ee9c6",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Photo",
+                    "type": "Button",
+                    "id": "8c044cb1-4dbd-4f88-b357-e40e8b6cbd0e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -80,6 +98,28 @@
                     "processors": "",
                     "groups": ";Manette",
                     "action": "move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f0df54be-d570-4a3c-9098-ffbf192dbfe7",
+                    "path": "<Gamepad>/rightStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Manette",
+                    "action": "zoom",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e70ce8ba-26b3-4cc3-affe-07e89f9c7d73",
+                    "path": "<XInputController>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Manette",
+                    "action": "Photo",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

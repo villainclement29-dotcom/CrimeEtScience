@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 3
   tags:
   - FxTemporaire
+  - hint
+  - tache-de-sang
   layers:
   - Default
   - TransparentFX
@@ -62,6 +64,9 @@ TagManager:
     locked: 0
   - name: floor2
     uniqueID: 2568987135
+    locked: 0
+  - name: camera
+    uniqueID: 2571988815
     locked: 0
   m_RenderingLayers:
   - Default
