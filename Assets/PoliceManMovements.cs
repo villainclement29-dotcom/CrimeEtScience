@@ -1,12 +1,15 @@
 using UnityEngine;
-using UnityEngine.InputSystem; 
+using UnityEngine.InputSystem;
 
 namespace Cainos.PixelArtTopDown_Basic
 {
     public class PoliceManMovements : MonoBehaviour
     {
+        [Header("Identification")]
+        public int playerId = 0; // 0 pour J1, 1 pour J2
+
         public float speed = 5f;
-        
+
         [Header("Sprites de direction")]
         public Sprite spriteUp;
         public Sprite spriteDown;
@@ -15,18 +18,32 @@ namespace Cainos.PixelArtTopDown_Basic
 
         private Rigidbody2D rb;
         private SpriteRenderer sr;
-        private Vector2 moveInput; 
+        private Vector2 moveInput;
+        private PlayerInput playerInput; // Ajouté pour la reconnexion
 
         private void Start()
         {
             rb = GetComponent<Rigidbody2D>();
             sr = GetComponent<SpriteRenderer>();
+            playerInput = GetComponent<PlayerInput>();
 
-            // Sécurité pour le Top-Down
+            // --- RECONNEXION À LA SESSION ---
+            if (GlobalPlayerManager.Instance != null && playerInput != null)
+            {
+                InputDevice device = (playerId == 0) ?
+                    GlobalPlayerManager.Instance.Player1Device :
+                    GlobalPlayerManager.Instance.Player2Device;
+
+                if (device != null)
+                {
+                    playerInput.SwitchCurrentControlScheme(device);
+                    Debug.Log($"<color=green>[Police J{playerId}]</color> Connecté à {device.displayName}");
+                }
+            }
+
             if (rb != null) rb.gravityScale = 0;
         }
 
-        // Cette fonction reçoit le signal du composant "Player Input"
         public void OnMove(InputValue value)
         {
             moveInput = value.Get<Vector2>();
@@ -34,25 +51,20 @@ namespace Cainos.PixelArtTopDown_Basic
 
         private void Update()
         {
-            // On change le sprite uniquement si on a une direction
             UpdateSprite(moveInput);
-
-            // Application du mouvement (Unity 6 utilise linearVelocity)
             rb.linearVelocity = moveInput * speed;
         }
 
         private void UpdateSprite(Vector2 dir)
         {
-            // Si on ne bouge pas, on ne change rien (le perso garde son dernier regard)
             if (dir.magnitude < 0.1f) return;
 
-            // Logique de priorité pour le changement de sprite
-            if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y)) // Mouvement horizontal dominant
+            if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
             {
                 if (dir.x > 0) sr.sprite = spriteRight;
                 else if (dir.x < 0) sr.sprite = spriteLeft;
             }
-            else // Mouvement vertical dominant
+            else
             {
                 if (dir.y > 0) sr.sprite = spriteUp;
                 else if (dir.y < 0) sr.sprite = spriteDown;

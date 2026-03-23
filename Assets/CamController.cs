@@ -4,6 +4,10 @@ using TMPro;
 
 public class PhotoCameraController : MonoBehaviour
 {
+    [Header("Configuration Joueur")]
+    [Tooltip("0 pour Joueur 1 (J0), 1 pour Joueur 2 (J1)")]
+    public int playerId = 0;
+
     [Header("Réglages")]
     public float moveSpeed = 5f;
     public float zoomSpeed = 5f;
@@ -24,42 +28,49 @@ public class PhotoCameraController : MonoBehaviour
     {
         cam = GetComponent<Camera>();
         playerInput = GetComponent<PlayerInput>();
-        
-        // LOG DE DÉBUG INITIAL
-        Debug.Log("<color=white>ÉVEIL : Script attaché sur " + gameObject.name + "</color>");
 
-        // Activation obligatoire des écrans secondaires au démarrage global
-        if (Display.displays.Length > 1) {
-            Display.displays[1].Activate();
-            Debug.Log("<color=orange>SYSTÈME : Écran secondaire détecté et activé.</color>");
-        }
+        Debug.Log("<color=white>ÉVEIL : Script attaché sur " + gameObject.name + "</color>");
     }
 
     void Start()
     {
-        int id = playerInput.playerIndex; 
-        Debug.Log("<color=cyan>JOUEUR RECONNU : ID = " + id + "</color>");
+        int id = playerId;
+        Debug.Log($"<color=cyan>JOUEUR ID : {id} (Prefab: {gameObject.name})</color>");
 
-        // --- GESTION DES DISPLAYS (ÉCRANS) ---
-        if (id == 0) 
+        // --- 1. RECONNEXION À LA MANETTE DE LA SESSION ---
+        if (GlobalPlayerManager.Instance != null)
         {
-            cam.targetDisplay = 0; // Display 1
-            Debug.Log("<color=green>[J0]</color> Configuré sur DISPLAY 1");
-        } 
-        else if (id == 1) 
+            InputDevice sessionDevice = (id == 0) ?
+                GlobalPlayerManager.Instance.Player1Device :
+                GlobalPlayerManager.Instance.Player2Device;
+
+            if (sessionDevice != null)
+            {
+                playerInput.SwitchCurrentControlScheme(sessionDevice);
+                Debug.Log($"<color=yellow>[J{id}]</color> Manette session associée : {sessionDevice.displayName}");
+            }
+            else
+            {
+                Debug.LogError($"<color=red>[J{id}]</color> Aucune manette de session trouvée !");
+            }
+        }
+        else
         {
-            cam.targetDisplay = 1; // Display 2
-            Debug.Log("<color=blue>[J1]</color> Configuré sur DISPLAY 2");
+            Debug.LogError($"[J{id}] <color=red>ATTENTION :</color> GlobalPlayerManager introuvable.");
         }
 
-        // --- RECHERCHE DU FOND ---
+        // --- 2. RECHERCHE DU FOND ---
         string targetBG = (id == 0) ? "Background_P1" : "Background_P2";
         GameObject bgObj = GameObject.Find(targetBG);
-        if (bgObj != null) {
+
+        if (bgObj != null)
+        {
             backgroundSprite = bgObj.GetComponent<SpriteRenderer>();
-            Debug.Log("<color=green>[J" + id + "]</color> Fond lié avec succès : " + targetBG);
-        } else {
-            Debug.LogError("[J" + id + "] ERREUR CRITIQUE : Impossible de trouver " + targetBG + " dans la scène !");
+            Debug.Log("<color=green>[J" + id + "]</color> Fond lié : " + targetBG);
+        }
+        else
+        {
+            Debug.LogError("[J" + id + "] ERREUR : Impossible de trouver " + targetBG);
         }
 
         AssignTextsToIndices();
@@ -67,31 +78,30 @@ public class PhotoCameraController : MonoBehaviour
 
     void Update()
     {
-        // On lit les inputs directement via le PlayerInput
-        if (playerInput != null) {
+        if (playerInput != null)
+        {
             moveInput = playerInput.actions["Move"].ReadValue<Vector2>();
             zoomInput = playerInput.actions["Zoom"].ReadValue<Vector2>().y;
-            
-            if (playerInput.actions["Photo"].triggered) {
-                Debug.Log("<color=yellow>[J" + playerInput.playerIndex + "] TOUCHE PHOTO PRESSÉE</color>");
+
+            if (playerInput.actions["Photo"].triggered)
+            {
+                Debug.Log($"<color=yellow>[J{playerId}] PHOTO !</color>");
                 CheckPhotoValidation();
             }
         }
 
         if (backgroundSprite == null) return;
 
-        // --- MOUVEMENT ---
-        if (moveInput != Vector2.zero) {
+        if (moveInput != Vector2.zero || Mathf.Abs(zoomInput) > 0.01f)
+        {
             ApplyMovement();
         }
     }
 
     void ApplyMovement()
     {
-        // Zoom
         cam.orthographicSize = Mathf.Clamp(cam.orthographicSize - (zoomInput * zoomSpeed * Time.deltaTime), minZoom, maxZoom);
 
-        // Limites
         float camHeight = cam.orthographicSize;
         float camWidth = camHeight * cam.aspect;
         Bounds b = backgroundSprite.bounds;
@@ -112,11 +122,21 @@ public class PhotoCameraController : MonoBehaviour
     {
         TextMeshProUGUI[] allTexts = GetComponentsInChildren<TextMeshProUGUI>(true);
         HintObject[] allIndices = Object.FindObjectsByType<HintObject>(FindObjectsSortMode.None);
-        foreach (HintObject indice in allIndices) {
-            foreach (TextMeshProUGUI txt in allTexts) {
-                if (txt.text.ToLower().Contains(indice.hintName.ToLower())) {
-                    indice.linkedText = txt;
-                    Debug.Log("<color=white>[J" + playerInput.playerIndex + "] Texte lié : " + indice.hintName + "</color>");
+
+        foreach (HintObject indice in allIndices)
+        {
+            // Vérification de distance pour séparer les indices J1 et J2
+            bool distanceValide = (playerId == 0 && indice.transform.position.x < 10) || (playerId == 1 && indice.transform.position.x > 10);
+
+            if (distanceValide)
+            {
+                foreach (TextMeshProUGUI txt in allTexts)
+                {
+                    if (txt.text.ToLower().Contains(indice.hintName.ToLower()))
+                    {
+                        indice.linkedText = txt;
+                        Debug.Log($"<color=white>[J{playerId}] UI liée : {indice.hintName}</color>");
+                    }
                 }
             }
         }
@@ -125,10 +145,13 @@ public class PhotoCameraController : MonoBehaviour
     void CheckPhotoValidation()
     {
         RaycastHit2D hit = Physics2D.CircleCast(transform.position, detectionRadius, Vector2.zero);
-        if (hit.collider != null && hit.collider.CompareTag("hint")) {
+
+        if (hit.collider != null && hit.collider.CompareTag("hint"))
+        {
             HintObject h = hit.collider.GetComponent<HintObject>();
-            if (h != null) {
-                Debug.Log("<color=green>PHOTO VALIDE !</color>");
+            if (h != null)
+            {
+                Debug.Log($"<color=green>J{playerId} PHOTO VALIDE !</color>");
                 h.OnFound(successColor);
             }
         }

@@ -1,17 +1,21 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; // Obligatoire pour changer de scène
+using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem; // Obligatoire pour le Gamepad
 
 public class SceneChanger : MonoBehaviour
 {
-    public string sceneToLoad; // Tape le nom de ta scène dans l'Inspector
-    public KeyCode interactionKey = KeyCode.E; // Touche par défaut : E
-
+    public string sceneToLoad;
     private bool isPlayerInside = false;
 
     void Update()
     {
-        // Si le joueur est dans la zone ET qu'il appuie sur la touche
-        if (isPlayerInside && Input.GetKeyDown(interactionKey))
+        // On vérifie s'il y a une manette et si le bouton South est pressé
+        bool gamepadInteract = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
+
+        // On garde aussi le clavier (E) au cas où pour tes tests
+        bool keyboardInteract = Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame;
+
+        if (isPlayerInside && (gamepadInteract || keyboardInteract))
         {
             ChangeScene();
         }
@@ -19,10 +23,11 @@ public class SceneChanger : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        // Vérifie si l'objet a le tag Player
         if (other.CompareTag("Player"))
         {
             isPlayerInside = true;
-            Debug.Log("Appuyez sur " + interactionKey + " pour entrer");
+            Debug.Log("Appuyez sur A (Manette) ou E (Clavier) pour entrer");
         }
     }
 
@@ -42,7 +47,7 @@ public class SceneChanger : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Nom de scène manquant sur l'objet " + gameObject.name);
+            Debug.LogError("Nom de scène manquant sur " + gameObject.name);
         }
     }
 }
