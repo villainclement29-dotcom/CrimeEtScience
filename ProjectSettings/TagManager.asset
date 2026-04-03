@@ -7,6 +7,8 @@ TagManager:
   - FxTemporaire
   - hint
   - tache-de-sang
+  - MainCameraJ1
+  - MainCameraJ2
   layers:
   - Default
   - TransparentFX

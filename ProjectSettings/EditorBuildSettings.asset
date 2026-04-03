@@ -6,13 +6,19 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 8c9cfa26abfee488c85f1582747f6a02
+    path: Assets/Scenes/Lobby.unity
+    guid: 0e39e73204615b94d99e9d03a21d4ef0
   - enabled: 1
-    path: Assets/Scenes/MiniGame1.unity
-    guid: 2b51c7bac2e079b4bb6877a2eb77e14f
+    path: Assets/Scenes/MainScene.unity
+    guid: 8c9cfa26abfee488c85f1582747f6a02
   - enabled: 1
     path: Assets/Scenes/MiniGame2.unity
     guid: 394678bc48c6bae439e174f18a884eaa
+  - enabled: 1
+    path: Assets/Scenes/MiniGame1.unity
+    guid: 740d19327c9e83c44acbb061381d14d8
+  - enabled: 1
+    path: Assets/Scenes/tutos/TutoMiniGame1.unity
+    guid: 1df404889cee79842ad07a35812ce942
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
