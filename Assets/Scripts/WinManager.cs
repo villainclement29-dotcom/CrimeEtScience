@@ -11,6 +11,7 @@ public class WinManager : MonoBehaviour
     public string mainSceneName = "MainScene";
     public float delayBeforeRedirection = 5f;
 
+    // Scores statiques persistants
     public static int scoreJ1 = 0, scoreJ2 = 0;
 
     private Canvas canvasJ1, canvasJ2;
@@ -19,10 +20,18 @@ public class WinManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance == null) Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
     }
 
-    // Appelé à chaque début de mini-jeu
     void OnEnable() { SceneManager.sceneLoaded += OnSceneLoaded; }
     void OnDisable() { SceneManager.sceneLoaded -= OnSceneLoaded; }
 
@@ -30,28 +39,26 @@ public class WinManager : MonoBehaviour
     {
         isGameOver = false;
 
-        // 1. On cherche les Canvas nommés "VictoryPanel" et "LoosePanel" dans la scène
         GameObject p1 = GameObject.Find("VictoryPanel");
         GameObject p2 = GameObject.Find("LoosePanel");
 
-        // 2. On cherche les caméras par leur NOM exact dans la scène
         Camera cam1 = GameObject.Find("Camerap1")?.GetComponent<Camera>();
         Camera cam2 = GameObject.Find("Camerap2")?.GetComponent<Camera>();
 
         if (p1 && cam1)
         {
             canvasJ1 = p1.GetComponent<Canvas>();
-            canvasJ1.worldCamera = cam1; // On lie l'UI à la caméra J1
+            canvasJ1.worldCamera = cam1;
             textJ1 = p1.GetComponentInChildren<TextMeshProUGUI>(true);
-            p1.SetActive(false); // On cache au départ
+            p1.SetActive(false);
         }
 
         if (p2 && cam2)
         {
             canvasJ2 = p2.GetComponent<Canvas>();
-            canvasJ2.worldCamera = cam2; // On lie l'UI à la caméra J2
+            canvasJ2.worldCamera = cam2;
             textJ2 = p2.GetComponentInChildren<TextMeshProUGUI>(true);
-            p2.SetActive(false); // On cache au départ
+            p2.SetActive(false);
         }
     }
 
@@ -60,27 +67,25 @@ public class WinManager : MonoBehaviour
         if (isGameOver) return;
         isGameOver = true;
 
-        if (winnerId == 0) scoreJ1++; else scoreJ2++;
+        // --- CHANGEMENT ICI : +100 au lieu de +1 ---
+        if (winnerId == 0) scoreJ1 += 100; else scoreJ2 += 100;
 
-        // On affiche les deux panels
-        canvasJ1.gameObject.SetActive(true);
-        canvasJ2.gameObject.SetActive(true);
+        if (canvasJ1) canvasJ1.gameObject.SetActive(true);
+        if (canvasJ2) canvasJ2.gameObject.SetActive(true);
 
-        // On génère les textes
         string winnerName = "Joueur " + (winnerId + 1);
-        string winMsg = $"BRAVO !\nScore : {scoreJ1}-{scoreJ2}";
+        string winMsg = $"BRAVO !\nScore Global : {scoreJ1} - {scoreJ2}";
         string loseMsg = $"PERDU...\n{winnerName} a gagné !";
 
-        // Attribution dynamique selon qui a gagné
         if (winnerId == 0)
         {
-            textJ1.text = winMsg;
-            textJ2.text = loseMsg;
+            if (textJ1) textJ1.text = winMsg;
+            if (textJ2) textJ2.text = loseMsg;
         }
         else
         {
-            textJ1.text = loseMsg;
-            textJ2.text = winMsg;
+            if (textJ1) textJ1.text = loseMsg;
+            if (textJ2) textJ2.text = winMsg;
         }
 
         StartCoroutine(WaitAndRedirect());

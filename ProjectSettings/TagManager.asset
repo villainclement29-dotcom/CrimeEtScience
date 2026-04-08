@@ -9,6 +9,7 @@ TagManager:
   - tache-de-sang
   - MainCameraJ1
   - MainCameraJ2
+  - interactionPoint
   layers:
   - Default
   - TransparentFX

@@ -20,5 +20,11 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/tutos/TutoMiniGame1.unity
     guid: 1df404889cee79842ad07a35812ce942
+  - enabled: 1
+    path: Assets/Scenes/tutos/TutoMiniGame2.unity
+    guid: 859caa35384d94b48962a509f6173c99
+  - enabled: 1
+    path: Assets/Scenes/Scene_ScoreBoard.unity
+    guid: 9b6f98b27e5de3a41bdb3a39238aad97
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

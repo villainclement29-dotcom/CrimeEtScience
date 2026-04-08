@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(unity-mcp-cli run-tool:*)",
+      "Bash(npx unity-mcp-cli:*)",
+      "Bash(grep -l \"map\\\\|Map\\\\|world\\\\|World\" /c/MMI3/dispositif_interactifs/CrimeEtScience/Assets/Scenes/*.unity)",
+      "Bash(xargs grep:*)",
+      "Bash(grep -n \"36365f77766b672448180725ba531697\\\\|62899f850307741f2a39c98a8b639597\" /c/MMI3/dispositif_interactifs/CrimeEtScience/Assets/Scripts/*.cs.meta)",
+      "Bash(git stash:*)",
+      "Bash(grep -n \"^--- !u!\\\\|fileID: [23456789]000000000000000[0-9]$\\\\|m_Name: Layer\\\\|m_Name: rugs\\\\|m_Name: walls\\\\|m_Name: ground\\\\|m_Name: spritesheet\" /c/MMI3/dispositif_interactifs/CrimeEtScience/Assets/Spritefusion/Maps/map.prefab)",
+      "Bash(python3:*)",
+      "Bash(python /tmp/modify_unity.py)",
+      "Bash(grep -A4 \"fileID: 27822826$\" /c/MMI3/dispositif_interactifs/CrimeEtScience/Assets/Scenes/MainScene.unity)",
+      "Bash(grep -A5 \"--- !u!1001 &1130506769\" /c/MMI3/dispositif_interactifs/CrimeEtScience/Assets/Scenes/MainScene.unity)",
+      "Bash(python /tmp/clean_prefab.py)",
+      "Bash(git checkout:*)",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(python /tmp/scene_fix.py)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "ai-game-developer"
+  ]
+}

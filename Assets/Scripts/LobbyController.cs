@@ -8,9 +8,6 @@ using System.Collections;
 
 public class LobbyController : MonoBehaviour
 {
-    [Header("Paramètres de Test")]
-    public bool testMode = false;
-
     [Header("UI Status")]
     public TextMeshProUGUI statusTextJ1_D1;
     public TextMeshProUGUI statusTextJ2_D1;
@@ -37,14 +34,13 @@ public class LobbyController : MonoBehaviour
 
     void Start()
     {
-        // Initialisation Écran 1
+        // Initialisation Vidéos
         if (videoContainer_D1 != null)
         {
             videoPlayer_D1 = videoContainer_D1.GetComponentInChildren<VideoPlayer>(true);
             videoContainer_D1.SetActive(false);
         }
 
-        // Initialisation Écran 2
         if (videoContainer_D2 != null)
         {
             videoPlayer_D2 = videoContainer_D2.GetComponentInChildren<VideoPlayer>(true);
@@ -93,59 +89,42 @@ public class LobbyController : MonoBehaviour
 
     IEnumerator PlayVideosAndLoad()
     {
-        // Sécurité si les composants sont manquants
         if (videoPlayer_D1 == null || videoPlayer_D2 == null)
         {
-            Debug.LogWarning("Composants vidéo manquants sur l'un des écrans. Chargement direct.");
             SceneManager.LoadScene(nextSceneName);
             yield break;
         }
 
-        // 1. Activer les deux containers
         videoContainer_D1.SetActive(true);
         videoContainer_D2.SetActive(true);
         videoPlayer_D1.gameObject.SetActive(true);
         videoPlayer_D2.gameObject.SetActive(true);
 
-        // 2. Préparer les deux vidéos simultanément
         videoPlayer_D1.Prepare();
         videoPlayer_D2.Prepare();
 
-        // On attend que les DEUX soient prêtes
-        while (!videoPlayer_D1.isPrepared || !videoPlayer_D2.isPrepared)
-        {
-            yield return null;
-        }
+        while (!videoPlayer_D1.isPrepared || !videoPlayer_D2.isPrepared) yield return null;
 
-        // 3. Assigner les textures aux RawImages respectives
         videoDisplay_D1.texture = videoPlayer_D1.texture;
         videoDisplay_D2.texture = videoPlayer_D2.texture;
 
-        // 4. Lancer les deux vidéos
         videoPlayer_D1.Play();
         videoPlayer_D2.Play();
 
         yield return new WaitForSeconds(0.5f);
+        while (videoPlayer_D1.isPlaying) yield return null;
 
-        // 5. Attendre la fin (on se base sur la vidéo 1 pour le timing)
-        while (videoPlayer_D1.isPlaying)
-        {
-            yield return null;
-        }
-
-        // 6. Chargement final
         SceneManager.LoadScene(nextSceneName);
     }
 
-    // --- UTILS ---
+    // --- UTILS (Inchangés) ---
     void DetectDevice(out InputDevice foundDevice, InputDevice excluded)
     {
         foundDevice = null;
         foreach (var device in InputSystem.devices)
         {
             if (device == excluded) continue;
-            bool isValid = device is Gamepad || device is Keyboard || device is Mouse;
-            if (isValid && CheckAnyButton(device)) { foundDevice = device; return; }
+            if ((device is Gamepad || device is Keyboard || device is Mouse) && CheckAnyButton(device)) { foundDevice = device; return; }
         }
     }
 

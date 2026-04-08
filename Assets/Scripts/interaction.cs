@@ -8,51 +8,58 @@ public class SceneChanger : MonoBehaviour
     public string sceneToLoad;
 
     [Header("Référence Transition")]
-    [Tooltip("Glisse ici l'objet qui possède le script VideoTransitionHandler")]
     public VideoTransitionHandler transitionHandler;
 
+    [Header("Points")]
+    public int pointsToGive = 50;
+
     private bool isPlayerInside = false;
+    private int playerIndexInside = -1; // 0 = J1, 1 = J2
+    private InteractionPointVisibility visibilityScript;
+
+    void Start()
+    {
+        // On récupère le script de visibilité sur le même objet
+        visibilityScript = GetComponent<InteractionPointVisibility>();
+    }
 
     void Update()
     {
         if (!isPlayerInside) return;
 
-        // --- DÉTECTION DES INPUTS ---
-        bool gamepadInteract = false;
+        // Détection des touches
+        bool interactPressed = false;
+
         foreach (var gp in Gamepad.all)
         {
-            if (gp.buttonSouth.wasPressedThisFrame) gamepadInteract = true;
+            if (gp.buttonSouth.wasPressedThisFrame) interactPressed = true;
         }
 
-        bool keyboardInteract = Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame;
+        if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+            interactPressed = true;
 
-        // --- SI ACTION ---
-        if (gamepadInteract || keyboardInteract)
+        if (interactPressed)
         {
-            Debug.Log($"<color=cyan>[Interaction]</color> Bouton pressé ! Tentative de transition vers : {sceneToLoad}");
+            AddPointsToInteractingPlayer();
+            Debug.Log($"<color=cyan>[Interaction]</color> +{pointsToGive} pts. Vers : {sceneToLoad}");
             ExecuteChange();
         }
     }
 
+    private void AddPointsToInteractingPlayer()
+    {
+        if (playerIndexInside == 0) WinManager.scoreJ1 += pointsToGive;
+        else if (playerIndexInside == 1) WinManager.scoreJ2 += pointsToGive;
+    }
+
     private void ExecuteChange()
     {
-        if (string.IsNullOrEmpty(sceneToLoad))
-        {
-            Debug.LogError("<color=red>[SceneChanger]</color> Nom de scène manquant sur " + gameObject.name);
-            return;
-        }
+        if (string.IsNullOrEmpty(sceneToLoad)) return;
 
-        // Si on a un handler de transition, on l'utilise
         if (transitionHandler != null)
-        {
             transitionHandler.StartTransition(sceneToLoad);
-        }
         else
-        {
-            // Sinon, on charge directement (sécurité)
-            Debug.LogWarning("[SceneChanger] Aucun TransitionHandler trouvé, chargement direct.");
             SceneManager.LoadScene(sceneToLoad);
-        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -60,7 +67,13 @@ public class SceneChanger : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInside = true;
-            Debug.Log("<color=green>[Trigger]</color> JOUEUR DÉTECTÉ ! Appuyez sur A ou E.");
+
+            // On rend l'objet visible via le script de visibilité
+            if (visibilityScript != null) visibilityScript.SetPlayerNearby(true);
+
+            // Identification du joueur par son nom
+            if (other.gameObject.name.Contains("1")) playerIndexInside = 0;
+            else if (other.gameObject.name.Contains("2")) playerIndexInside = 1;
         }
     }
 
@@ -69,7 +82,10 @@ public class SceneChanger : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInside = false;
-            Debug.Log("<color=red>[Trigger]</color> Le joueur a quitté la zone.");
+            playerIndexInside = -1;
+
+            // On repasse en mode "caché" (sauf si la lampe torche l'éclaire encore)
+            if (visibilityScript != null) visibilityScript.SetPlayerNearby(false);
         }
     }
 }
