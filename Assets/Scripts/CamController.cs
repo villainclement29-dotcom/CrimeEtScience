@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Users; // INDISPENSABLE pour la séparation des contrôles
+using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 public class PhotoCameraController : MonoBehaviour
 {
@@ -19,6 +21,15 @@ public class PhotoCameraController : MonoBehaviour
     public float detectionRadius = 0.5f;
     public Color successColor = Color.green;
 
+    [Header("Sons")]
+    public AudioClip shutterClip;
+    public AudioClip zoomInClip;
+    public AudioClip zoomOutClip;
+    [Range(0f, 1f)] public float sfxVolume = 0.8f;
+
+    [Header("Flash Photo")]
+    public Image flashImage; // Image blanche plein écran dans le Canvas appareilPhoto
+
     [Header("Score & Fin de Partie")]
     private int hintsFound = 0;
     private int totalHintsToFind = 0;
@@ -26,6 +37,8 @@ public class PhotoCameraController : MonoBehaviour
 
     private Camera cam;
     private PlayerInput playerInput;
+    private AudioSource audioSource;
+    private AudioSource zoomAudioSource;
     private SpriteRenderer backgroundSprite;
     private Vector2 moveInput;
     private float zoomInput;
@@ -34,6 +47,17 @@ public class PhotoCameraController : MonoBehaviour
     {
         cam = GetComponent<Camera>();
         playerInput = GetComponent<PlayerInput>();
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 0f;
+
+        zoomAudioSource = gameObject.AddComponent<AudioSource>();
+        zoomAudioSource.loop        = false;
+        zoomAudioSource.playOnAwake = false;
+        zoomAudioSource.spatialBlend = 0f;
+        zoomAudioSource.volume      = sfxVolume;
+
+        if (flashImage != null) flashImage.color = new Color(1, 1, 1, 0);
 
         Debug.Log("<color=white>ÉVEIL : Script attaché sur " + gameObject.name + "</color>");
     }
@@ -118,8 +142,12 @@ public class PhotoCameraController : MonoBehaviour
 
             if (playerInput.actions["Photo"].triggered)
             {
+                if (shutterClip != null) audioSource.PlayOneShot(shutterClip, sfxVolume);
+                if (flashImage != null) StartCoroutine(FlashEffect());
                 CheckPhotoValidation();
             }
+
+            UpdateZoomSound();
         }
 
         if (backgroundSprite == null) return;
@@ -174,6 +202,29 @@ public class PhotoCameraController : MonoBehaviour
                 }
             }
         }
+    }
+
+    void UpdateZoomSound()
+    {
+        if (zoomAudioSource == null) return;
+
+        AudioClip target = null;
+        if      (zoomInput >  0.1f) target = zoomInClip  != null ? zoomInClip  : zoomOutClip;
+        else if (zoomInput < -0.1f) target = zoomOutClip != null ? zoomOutClip : zoomInClip;
+
+        if (target != null && !zoomAudioSource.isPlaying)
+            zoomAudioSource.PlayOneShot(target, sfxVolume);
+    }
+
+    IEnumerator FlashEffect()
+    {
+        flashImage.color = new Color(1, 1, 1, 1);
+        for (float t = 0; t < 0.4f; t += Time.deltaTime)
+        {
+            flashImage.color = new Color(1, 1, 1, Mathf.Lerp(1f, 0f, t / 0.4f));
+            yield return null;
+        }
+        flashImage.color = new Color(1, 1, 1, 0);
     }
 
     void CheckPhotoValidation()

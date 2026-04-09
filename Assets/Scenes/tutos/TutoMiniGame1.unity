@@ -3471,7 +3471,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   musicClip: {fileID: 8300000, guid: 333eee28a2ab9684fbe316d4ee01e995, type: 3}
-  volume: 0.196
+  volume: 0.102
   fadeInDuration: 1
   voiceOverClip: {fileID: 8300000, guid: ca986f5393d39ad448630e323db2d4b0, type: 3}
   voiceOverVolume: 0.668

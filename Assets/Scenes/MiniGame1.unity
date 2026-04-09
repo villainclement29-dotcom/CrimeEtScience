@@ -3588,7 +3588,7 @@ MonoBehaviour:
   couleurDefaut: {r: 1, g: 1, b: 1, a: 1}
   barreScanner: {fileID: 50463983}
   zoneEmpreinte: {fileID: 1296813089}
-  vitesseScanner: 300
+  vitesseScanner: 115
   spriteValide: {fileID: -5945326991334564980, guid: 123339bb81bf66e429d08a4590c067b1,
     type: 3}
   spriteErreur: {fileID: -6576495340010411312, guid: 7bf3f83667005fd48831f95500e35598,
@@ -3596,6 +3596,9 @@ MonoBehaviour:
   spriteRondAttente: {fileID: 8962464735089715510, guid: e34f1ce8ad27868488d4c179101360c3,
     type: 3}
   solutionsCorrectes: 00000000020000000100000003000000
+  hoverClip: {fileID: 8300000, guid: 3ee09e6dd062ee44d839fe17246ea927, type: 3}
+  scanClip: {fileID: 8300000, guid: e8720407f1ec46d40a891684ec7e0be0, type: 3}
+  sfxVolume: 0.4
 --- !u!4 &755876318
 Transform:
   m_ObjectHideFlags: 0
@@ -4395,7 +4398,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.48141295, y: 0}
   m_AnchorMax: {x: 0.48141295, y: 0}
-  m_AnchoredPosition: {x: -0.7545471, y: -27.199951}
+  m_AnchoredPosition: {x: -0.7545471, y: -27.199959}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &932428370
@@ -6148,7 +6151,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -238.16995, y: 5.5999756}
+  m_AnchoredPosition: {x: -238.16997, y: 5.5999756}
   m_SizeDelta: {x: -530.2, y: -66.3}
   m_Pivot: {x: 0.49999976, y: 0.5}
 --- !u!114 &1296813090
@@ -7120,7 +7123,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.48282585, y: 0}
   m_AnchorMax: {x: 0.48282585, y: 0}
-  m_AnchoredPosition: {x: 0.8845444, y: -27.800049}
+  m_AnchoredPosition: {x: 0.8845444, y: -27.800056}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1560066744
@@ -7422,7 +7425,7 @@ MonoBehaviour:
   couleurDefaut: {r: 1, g: 1, b: 1, a: 1}
   barreScanner: {fileID: 1403272919}
   zoneEmpreinte: {fileID: 886158440}
-  vitesseScanner: 300
+  vitesseScanner: 115
   spriteValide: {fileID: -5945326991334564980, guid: 123339bb81bf66e429d08a4590c067b1,
     type: 3}
   spriteErreur: {fileID: -6576495340010411312, guid: 7bf3f83667005fd48831f95500e35598,
@@ -7430,6 +7433,9 @@ MonoBehaviour:
   spriteRondAttente: {fileID: 8962464735089715510, guid: e34f1ce8ad27868488d4c179101360c3,
     type: 3}
   solutionsCorrectes: 00000000020000000100000003000000
+  hoverClip: {fileID: 8300000, guid: 3ee09e6dd062ee44d839fe17246ea927, type: 3}
+  scanClip: {fileID: 8300000, guid: e8720407f1ec46d40a891684ec7e0be0, type: 3}
+  sfxVolume: 0.401
 --- !u!1 &1598257073
 GameObject:
   m_ObjectHideFlags: 0

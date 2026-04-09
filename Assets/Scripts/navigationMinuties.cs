@@ -37,6 +37,12 @@ public class MinutiesNavigator : MonoBehaviour
     private InputDevice playerDevice;
     private int[] choixJoueur;
 
+    [Header("SFX")]
+    public AudioClip hoverClip;
+    public AudioClip scanClip;
+    [Range(0f, 1f)] public float sfxVolume = 0.8f;
+    private AudioSource audioSource;
+
     private bool stickUsed = false;
     private const float stickThreshold = 0.5f;
 
@@ -52,6 +58,10 @@ public class MinutiesNavigator : MonoBehaviour
                 GlobalPlayerManager.Instance.Player1Device :
                 GlobalPlayerManager.Instance.Player2Device;
         }
+
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.playOnAwake  = false;
+        audioSource.spatialBlend = 0f;
 
         if (menuUI) menuUI.SetActive(false);
         if (barreScanner) barreScanner.gameObject.SetActive(false);
@@ -83,6 +93,7 @@ public class MinutiesNavigator : MonoBehaviour
 
         enCoursDeScan = true;
         barreScanner.gameObject.SetActive(true);
+        if (scanClip != null) audioSource.PlayOneShot(scanClip, sfxVolume);
 
         float haut = zoneEmpreinte.rect.height / 2;
         float bas = -zoneEmpreinte.rect.height / 2;
@@ -194,10 +205,11 @@ public class MinutiesNavigator : MonoBehaviour
         if (dir != Vector2.zero)
         {
             int target = FindNearestInDirection(dir);
-            if (target >= 0)
+            if (target >= 0 && target != currentIndex)
             {
                 currentIndex = target;
                 ActualiserPosition();
+                if (hoverClip != null) audioSource.PlayOneShot(hoverClip, sfxVolume);
             }
         }
     }
