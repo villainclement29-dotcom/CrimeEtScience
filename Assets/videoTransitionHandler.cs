@@ -75,7 +75,8 @@ public class VideoTransitionHandler : MonoBehaviour
         videoDisplay_D2.texture = videoPlayer_D2.texture;
 
         // 4. Fade out musique puis lancer la lecture simultanée
-        if (MusicManager.Instance != null) MusicManager.Instance.StopMusic();
+        SceneMusicPlayer smp = Object.FindFirstObjectByType<SceneMusicPlayer>();
+        if (smp != null) smp.FadeOut(0.5f);
         videoPlayer_D1.Play();
         videoPlayer_D2.Play();
 

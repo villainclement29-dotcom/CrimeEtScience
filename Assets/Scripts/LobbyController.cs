@@ -251,7 +251,8 @@ public class LobbyController : MonoBehaviour
         videoDisplay_D1.texture = videoPlayer_D1.texture;
         videoDisplay_D2.texture = videoPlayer_D2.texture;
 
-        if (MusicManager.Instance != null) MusicManager.Instance.StopMusic();
+        SceneMusicPlayer smp = Object.FindFirstObjectByType<SceneMusicPlayer>();
+        if (smp != null) smp.FadeOut(0.5f);
         videoPlayer_D1.Play();
         videoPlayer_D2.Play();
 

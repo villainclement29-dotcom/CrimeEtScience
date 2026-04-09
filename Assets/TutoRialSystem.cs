@@ -60,8 +60,8 @@ public class TutorialReadySystem : MonoBehaviour
 
     void UpdateUI()
     {
-        if (statusJ1) statusJ1.text = isJ1Ready ? "<color=green>PRÊT</color>" : "<color=red>ATTENTE...</color>";
-        if (statusJ2) statusJ2.text = isJ2Ready ? "<color=green>PRÊT</color>" : "<color=red>ATTENTE...</color>";
+        if (statusJ1) statusJ1.text = isJ1Ready ? "<color=green>PRÊT</color>" : "<color=red>APPUYEZ SUR A</color>";
+        if (statusJ2) statusJ2.text = isJ2Ready ? "<color=green>PRÊT</color>" : "<color=red>APPUYEZ SUR A</color>";
     }
 
     IEnumerator StartGameRoutine()

@@ -1,23 +1,33 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
+[RequireComponent(typeof(AudioSource))]
 public class MusicManager : MonoBehaviour
 {
     public static MusicManager Instance { get; private set; }
 
-    [Header("Musiques")]
-    public AudioClip lobbyMusic;
-    public AudioClip mainSceneMusic;
+    [System.Serializable]
+    public class SceneMusic
+    {
+        public string sceneName;
+        public AudioClip music;
+    }
 
-    [Header("Paramètres")]
+    [Header("Musiques par scène")]
+    public SceneMusic[] sceneMusics;
+
+    [Header("Paramètres musique")]
     [Range(0f, 1f)] public float volume = 0.5f;
     public float fadeDuration = 1f;
 
-    [Header("Noms de scènes")]
-    public string lobbySceneName = "Lobby";
-    public string mainSceneName  = "MainScene";
+    [Header("Voix off par scène")]
+    public SceneMusic[] sceneVoiceOvers;
+    [Range(0f, 1f)] public float voiceOverVolume = 0.9f;
+    public float voiceOverDelay = 0.5f;
 
-    private AudioSource audioSource;
+    private AudioSource musicSource;
+    private AudioSource voiceOverSource;
     private Coroutine fadeCoroutine;
 
     void Awake()
@@ -26,11 +36,24 @@ public class MusicManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.loop   = true;
-        audioSource.volume = volume;
+        AudioSource[] sources = GetComponents<AudioSource>();
+        musicSource = sources.Length > 0 ? sources[0] : gameObject.AddComponent<AudioSource>();
+        voiceOverSource = sources.Length > 1 ? sources[1] : gameObject.AddComponent<AudioSource>();
+
+        musicSource.loop        = true;
+        musicSource.playOnAwake = false;
+        musicSource.volume      = volume;
+
+        voiceOverSource.loop        = false;
+        voiceOverSource.playOnAwake = false;
+        voiceOverSource.volume      = voiceOverVolume;
 
         SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void Start()
+    {
+        OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
     }
 
     void OnDestroy()
@@ -40,19 +63,51 @@ public class MusicManager : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        AudioClip clip = null;
-        if (scene.name == lobbySceneName)    clip = lobbyMusic;
-        else if (scene.name == mainSceneName) clip = mainSceneMusic;
+        AudioClip musicClip = FindClip(sceneMusics, scene.name);
+        AudioClip voClip    = FindClip(sceneVoiceOvers, scene.name);
 
-        if (clip != null) PlayMusic(clip);
+        if (musicClip != null)
+            SwitchMusic(musicClip);
+        else
+            StopMusic();
+
+        voiceOverSource.Stop();
+        if (voClip != null)
+            StartCoroutine(PlayVoiceOverDelayed(voClip));
     }
 
-    public void PlayMusic(AudioClip clip)
+    AudioClip FindClip(SceneMusic[] list, string sceneName)
     {
-        if (audioSource.clip == clip && audioSource.isPlaying) return;
+        if (list == null) return null;
+        foreach (var e in list)
+            if (e.sceneName == sceneName && e.music != null) return e.music;
+        return null;
+    }
 
+    void SwitchMusic(AudioClip clip)
+    {
         if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
-        fadeCoroutine = StartCoroutine(FadeTo(clip));
+
+        // Même clip déjà en cours : reprend juste le volume
+        if (musicSource.clip == clip)
+        {
+            if (!musicSource.isPlaying) musicSource.Play();
+            fadeCoroutine = StartCoroutine(FadeIn());
+            return;
+        }
+
+        // Nouveau clip : fade out puis swap
+        if (musicSource.isPlaying)
+            fadeCoroutine = StartCoroutine(FadeOutThenPlay(clip));
+        else
+            PlayDirect(clip);
+    }
+
+    void PlayDirect(AudioClip clip)
+    {
+        musicSource.clip   = clip;
+        musicSource.volume = volume;
+        musicSource.Play();
     }
 
     public void StopMusic()
@@ -61,42 +116,45 @@ public class MusicManager : MonoBehaviour
         fadeCoroutine = StartCoroutine(FadeOut());
     }
 
-    System.Collections.IEnumerator FadeTo(AudioClip clip)
+    IEnumerator FadeIn()
     {
-        // Fade out
-        float start = audioSource.volume;
+        float start = musicSource.volume;
         for (float t = 0; t < fadeDuration; t += Time.deltaTime)
         {
-            audioSource.volume = Mathf.Lerp(start, 0f, t / fadeDuration);
+            if (musicSource == null) yield break;
+            musicSource.volume = Mathf.Lerp(start, volume, t / fadeDuration);
             yield return null;
         }
-        audioSource.volume = 0f;
-
-        // Swap clip
-        audioSource.Stop();
-        audioSource.clip = clip;
-        audioSource.Play();
-
-        // Fade in
-        for (float t = 0; t < fadeDuration; t += Time.deltaTime)
-        {
-            audioSource.volume = Mathf.Lerp(0f, volume, t / fadeDuration);
-            yield return null;
-        }
-        audioSource.volume = volume;
+        musicSource.volume = volume;
         fadeCoroutine = null;
     }
 
-    System.Collections.IEnumerator FadeOut()
+    IEnumerator FadeOut()
     {
-        float start = audioSource.volume;
+        float start = musicSource.volume;
         for (float t = 0; t < fadeDuration; t += Time.deltaTime)
         {
-            audioSource.volume = Mathf.Lerp(start, 0f, t / fadeDuration);
+            if (musicSource == null) yield break;
+            musicSource.volume = Mathf.Lerp(start, 0f, t / fadeDuration);
             yield return null;
         }
-        audioSource.volume = 0f;
-        audioSource.Stop();
+        musicSource.volume = 0f;
+        musicSource.Stop();
         fadeCoroutine = null;
+    }
+
+    IEnumerator FadeOutThenPlay(AudioClip clip)
+    {
+        yield return FadeOut();
+        PlayDirect(clip);
+        fadeCoroutine = StartCoroutine(FadeIn());
+    }
+
+    IEnumerator PlayVoiceOverDelayed(AudioClip clip)
+    {
+        yield return new WaitForSeconds(voiceOverDelay);
+        voiceOverSource.clip   = clip;
+        voiceOverSource.volume = voiceOverVolume;
+        voiceOverSource.Play();
     }
 }
