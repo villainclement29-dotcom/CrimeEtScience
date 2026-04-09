@@ -13,6 +13,10 @@ public class SceneChanger : MonoBehaviour
     [Header("Points")]
     public int pointsToGive = 50;
 
+    [Header("SFX")]
+    public AudioClip interactSFX;
+    [Range(0f, 1f)] public float sfxVolume = 0.8f;
+
     private bool isPlayerInside = false;
     private int playerIndexInside = -1; // 0 = J1, 1 = J2
     private InteractionPointVisibility visibilityScript;
@@ -31,6 +35,8 @@ public class SceneChanger : MonoBehaviour
         {
             AddPointsToInteractingPlayer();
             Debug.Log($"<color=cyan>[Interaction]</color> +{pointsToGive} pts. Vers : {sceneToLoad}");
+            if (interactSFX != null)
+                AudioSource.PlayClipAtPoint(interactSFX, Camera.main != null ? Camera.main.transform.position : Vector3.zero, sfxVolume);
             ExecuteChange();
         }
     }

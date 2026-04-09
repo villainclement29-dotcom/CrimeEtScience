@@ -18,6 +18,16 @@ namespace Cainos.PixelArtTopDown_Basic
         public Sprite spriteLeft;
         public Sprite spriteRight;
 
+        [Header("Bruits de Pas")]
+        public AudioClip[] footstepClips;   // Mets 2-3 clips différents pour plus de variété
+        [Range(0f, 1f)] public float footstepVolume = 0.4f;
+        public float footstepInterval = 0.35f; // secondes entre chaque pas
+        [Range(0f, 0.3f)] public float pitchVariation = 0.15f;
+        [Range(0f, 0.2f)] public float volumeVariation = 0.1f;
+        private AudioSource footstepSource;
+        private float footstepTimer = 0f;
+        private int lastClipIndex = -1;
+
         [Header("Système de Lampe Torche")]
         public GameObject flashlight;
 
@@ -61,6 +71,13 @@ namespace Cainos.PixelArtTopDown_Basic
                     Debug.LogWarning($"<color=red>[PoliceMovements]</color> Aucune manette trouvée pour le Joueur {playerId} dans le GlobalPlayerManager !");
                 }
             }
+
+            // AudioSource pour les bruits de pas
+            footstepSource = gameObject.AddComponent<AudioSource>();
+            footstepSource.loop        = false;
+            footstepSource.volume      = footstepVolume;
+            footstepSource.spatialBlend = 0f;
+            footstepSource.playOnAwake = false;
 
             // Désactive la gravité pour le top-down
             if (rb != null) rb.gravityScale = 0;
@@ -107,6 +124,7 @@ namespace Cainos.PixelArtTopDown_Basic
         private void Update()
         {
             UpdateSpriteAndFlashlight(moveInput);
+            UpdateFootsteps();
 
             if (rb != null)
             {
@@ -114,6 +132,45 @@ namespace Cainos.PixelArtTopDown_Basic
                 // Si tu es sur une version plus ancienne, utilise : rb.velocity = moveInput * speed;
                 rb.linearVelocity = moveInput * speed;
             }
+        }
+
+        private void UpdateFootsteps()
+        {
+            if (footstepSource == null || footstepClips == null || footstepClips.Length == 0) return;
+
+            if (moveInput.magnitude > 0.1f)
+            {
+                footstepTimer -= Time.deltaTime;
+                if (footstepTimer <= 0f)
+                {
+                    PlayFootstep();
+                    footstepTimer = footstepInterval;
+                }
+            }
+            else
+            {
+                footstepTimer = 0f; // reset pour que le prochain pas soit immédiat
+            }
+        }
+
+        private void PlayFootstep()
+        {
+            // Choisit un clip différent du précédent
+            int index = lastClipIndex;
+            if (footstepClips.Length > 1)
+            {
+                while (index == lastClipIndex)
+                    index = Random.Range(0, footstepClips.Length);
+            }
+            else { index = 0; }
+
+            lastClipIndex = index;
+            AudioClip clip = footstepClips[index];
+            if (clip == null) return;
+
+            footstepSource.pitch  = 1f + Random.Range(-pitchVariation, pitchVariation);
+            footstepSource.volume = footstepVolume + Random.Range(-volumeVariation, volumeVariation);
+            footstepSource.PlayOneShot(clip);
         }
 
         private void UpdateSpriteAndFlashlight(Vector2 dir)

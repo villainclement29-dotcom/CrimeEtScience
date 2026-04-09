@@ -541,7 +541,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lobbyMusic: {fileID: 8300000, guid: 2c2d91d4c85060d499740cd8da224c23, type: 3}
   mainSceneMusic: {fileID: 8300000, guid: 2c2d91d4c85060d499740cd8da224c23, type: 3}
-  volume: 0.6
+  volume: 0.422
   fadeDuration: 1
   lobbySceneName: Lobby
   mainSceneName: MainScene
@@ -3127,7 +3127,7 @@ MonoBehaviour:
       type: 3}
     spriteRight: {fileID: -1259408508766424310, guid: d58b7faf8f037ed409ea1aa0474e02bb,
       type: 3}
-    scale: 1
+    scale: 1.16
   - characterName: TIC labo
     spriteCarousel: {fileID: 8496277115582851700, guid: 65e33b1f27fb4e341b8818f28777048c,
       type: 3}
@@ -3139,7 +3139,7 @@ MonoBehaviour:
       type: 3}
     spriteRight: {fileID: -1041026291749628235, guid: 65e33b1f27fb4e341b8818f28777048c,
       type: 3}
-    scale: 1.4
+    scale: 1.54
   videoContainer_D1: {fileID: 906239444}
   videoDisplay_D1: {fileID: 694551364}
   videoContainer_D2: {fileID: 436005844}
