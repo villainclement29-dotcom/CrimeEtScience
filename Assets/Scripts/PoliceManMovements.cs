@@ -65,6 +65,22 @@ namespace Cainos.PixelArtTopDown_Basic
             // Désactive la gravité pour le top-down
             if (rb != null) rb.gravityScale = 0;
 
+            // Application des sprites du personnage sélectionné dans le lobby
+            CharacterData cd = playerId == 0
+                ? CharacterSelectionData.J1Data
+                : CharacterSelectionData.J2Data;
+
+            if (cd != null)
+            {
+                if (cd.spriteDown  != null) spriteDown  = cd.spriteDown;
+                if (cd.spriteUp    != null) spriteUp    = cd.spriteUp;
+                if (cd.spriteLeft  != null) spriteLeft  = cd.spriteLeft;
+                if (cd.spriteRight != null) spriteRight = cd.spriteRight;
+                if (cd.spriteDown  != null && sr != null) sr.sprite = cd.spriteDown;
+                if (cd.scale > 0f)
+                    transform.localScale = Vector3.one * cd.scale;
+            }
+
             // Positionnement initial de la lampe
             if (flashlight != null && anchorDown != null)
             {

@@ -1944,6 +1944,31 @@ MonoBehaviour:
   statusTextJ2_D1: {fileID: 1136665210}
   statusTextJ1_D2: {fileID: 1186801262}
   statusTextJ2_D2: {fileID: 2067919167}
+  characters:
+  - characterName: TIC terrain
+    spriteCarousel: {fileID: 8020143640844766479, guid: d58b7faf8f037ed409ea1aa0474e02bb,
+      type: 3}
+    spriteDown: {fileID: 8020143640844766479, guid: d58b7faf8f037ed409ea1aa0474e02bb,
+      type: 3}
+    spriteUp: {fileID: -6251682230944352461, guid: d58b7faf8f037ed409ea1aa0474e02bb,
+      type: 3}
+    spriteLeft: {fileID: -5962389079421231736, guid: d58b7faf8f037ed409ea1aa0474e02bb,
+      type: 3}
+    spriteRight: {fileID: -1259408508766424310, guid: d58b7faf8f037ed409ea1aa0474e02bb,
+      type: 3}
+    scale: 1
+  - characterName: TIC labo
+    spriteCarousel: {fileID: 8496277115582851700, guid: 65e33b1f27fb4e341b8818f28777048c,
+      type: 3}
+    spriteDown: {fileID: 411370580105265954, guid: 65e33b1f27fb4e341b8818f28777048c,
+      type: 3}
+    spriteUp: {fileID: -3698155694435617052, guid: 65e33b1f27fb4e341b8818f28777048c,
+      type: 3}
+    spriteLeft: {fileID: 6078076484178776230, guid: 65e33b1f27fb4e341b8818f28777048c,
+      type: 3}
+    spriteRight: {fileID: -1041026291749628235, guid: 65e33b1f27fb4e341b8818f28777048c,
+      type: 3}
+    scale: 1.4
   videoContainer_D1: {fileID: 906239444}
   videoDisplay_D1: {fileID: 694551364}
   videoContainer_D2: {fileID: 436005844}
