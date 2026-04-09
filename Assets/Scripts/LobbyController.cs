@@ -48,7 +48,7 @@ public class LobbyController : MonoBehaviour
         }
 
         // Initialisation Textes
-        string attenteMsg = "<color=white>APPUYEZ SUR UNE TOUCHE...</color>";
+        string attenteMsg = "<color=white>APPUYEZ SUR A POUR COMMENCER...</color>";
         if (statusTextJ1_D1) { statusTextJ1_D1.text = "J1 : " + attenteMsg; StartCoroutine(FlashText(statusTextJ1_D1)); }
         if (statusTextJ1_D2) { statusTextJ1_D2.text = "J1 : " + attenteMsg; StartCoroutine(FlashText(statusTextJ1_D2)); }
         if (statusTextJ2_D1) { statusTextJ2_D1.text = "J2 : " + attenteMsg; StartCoroutine(FlashText(statusTextJ2_D1)); }

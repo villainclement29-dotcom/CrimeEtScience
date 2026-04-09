@@ -480,6 +480,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6529361bd381d5438ffe2c384bea507, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  scoreboardSceneName: Scene_ScoreBoard
 --- !u!4 &364151755
 Transform:
   m_ObjectHideFlags: 0
@@ -507,7 +508,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19527e0d3b052ad4e900d7c9d86f0468, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainSceneName: MainScene
+  mainSceneName: Lobby
   delayBeforeRedirection: 3
 --- !u!1 &436005844
 GameObject:
@@ -1939,7 +1940,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a0fd269b9059a342ba3cf6432bab408, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testMode: 0
   statusTextJ1_D1: {fileID: 151511892}
   statusTextJ2_D1: {fileID: 1136665210}
   statusTextJ1_D2: {fileID: 1186801262}

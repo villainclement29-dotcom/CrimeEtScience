@@ -25,25 +25,35 @@ public class SceneChanger : MonoBehaviour
 
     void Update()
     {
-        if (!isPlayerInside) return;
+        if (!isPlayerInside || playerIndexInside < 0) return;
 
-        // Détection des touches
-        bool interactPressed = false;
-
-        foreach (var gp in Gamepad.all)
-        {
-            if (gp.buttonSouth.wasPressedThisFrame) interactPressed = true;
-        }
-
-        if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
-            interactPressed = true;
-
-        if (interactPressed)
+        if (IsInteractPressed(playerIndexInside))
         {
             AddPointsToInteractingPlayer();
             Debug.Log($"<color=cyan>[Interaction]</color> +{pointsToGive} pts. Vers : {sceneToLoad}");
             ExecuteChange();
         }
+    }
+
+    private bool IsInteractPressed(int playerIndex)
+    {
+        InputDevice device = null;
+        if (GlobalPlayerManager.Instance != null)
+            device = playerIndex == 0
+                ? GlobalPlayerManager.Instance.Player1Device
+                : GlobalPlayerManager.Instance.Player2Device;
+
+        if (device is Gamepad gp)
+            return gp.buttonSouth.wasPressedThisFrame;
+
+        if (device is Keyboard kb)
+            return kb.eKey.wasPressedThisFrame;
+
+        // Fallback si pas de GlobalPlayerManager : on accepte n'importe quel clavier
+        if (device == null && Keyboard.current != null)
+            return Keyboard.current.eKey.wasPressedThisFrame;
+
+        return false;
     }
 
     private void AddPointsToInteractingPlayer()
@@ -55,6 +65,21 @@ public class SceneChanger : MonoBehaviour
     private void ExecuteChange()
     {
         if (string.IsNullOrEmpty(sceneToLoad)) return;
+
+        // Sauvegarde la scène courante pour y revenir après le minijeu
+        WinManager.returnScene = SceneManager.GetActiveScene().name;
+
+        // Sauvegarde les positions des joueurs
+        WinManager.hasSavedPositions = false;
+        foreach (var p in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            if (p.name.Contains("1")) { WinManager.savedPositionJ1 = p.transform.position; WinManager.hasSavedPositions = true; }
+            else if (p.name.Contains("2")) { WinManager.savedPositionJ2 = p.transform.position; WinManager.hasSavedPositions = true; }
+        }
+
+        // Marque ce point d'interaction comme utilisé et le désactive
+        InteractionPointRandomizer.MarkPointUsed(transform.position);
+        gameObject.SetActive(false);
 
         if (transitionHandler != null)
             transitionHandler.StartTransition(sceneToLoad);

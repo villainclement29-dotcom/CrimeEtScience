@@ -9,12 +9,53 @@ public class InteractionPointRandomizer : MonoBehaviour
     [Header("8 emplacements possibles sur la carte")]
     public Transform[] spawnSpots;
 
-    void Start()
+    // Persistants entre rechargements de scène
+    private static Vector3[] savedPositions = null;
+    private static HashSet<int> usedIndices = new HashSet<int>();
+
+    public static void ResetSavedPositions()
     {
-        RandomizePositions();
+        savedPositions = null;
+        usedIndices.Clear();
     }
 
-    void RandomizePositions()
+    /// <summary>
+    /// Appelé par SceneChanger avant de quitter vers un minijeu.
+    /// Identifie le point par sa position dans savedPositions.
+    /// </summary>
+    public static void MarkPointUsed(Vector3 worldPosition)
+    {
+        if (savedPositions == null) return;
+        for (int i = 0; i < savedPositions.Length; i++)
+        {
+            if (Vector3.Distance(savedPositions[i], worldPosition) < 0.01f)
+            {
+                usedIndices.Add(i);
+                return;
+            }
+        }
+    }
+
+    void Start()
+    {
+        if (savedPositions != null && savedPositions.Length == interactionPoints.Length)
+            RestorePositions();
+        else
+            RandomizeAndSave();
+
+        ApplyUsedState();
+    }
+
+    void RestorePositions()
+    {
+        for (int i = 0; i < interactionPoints.Length; i++)
+        {
+            if (interactionPoints[i] != null)
+                interactionPoints[i].position = savedPositions[i];
+        }
+    }
+
+    void RandomizeAndSave()
     {
         if (interactionPoints == null || spawnSpots == null) return;
         if (spawnSpots.Length < interactionPoints.Length)
@@ -23,7 +64,6 @@ public class InteractionPointRandomizer : MonoBehaviour
             return;
         }
 
-        // Copie et mélange aléatoire des spots (Fisher-Yates)
         List<Transform> shuffled = new List<Transform>(spawnSpots);
         for (int i = shuffled.Count - 1; i > 0; i--)
         {
@@ -33,11 +73,31 @@ public class InteractionPointRandomizer : MonoBehaviour
             shuffled[j] = tmp;
         }
 
-        // Place chaque interaction point sur un spot aléatoire unique
+        savedPositions = new Vector3[interactionPoints.Length];
         for (int i = 0; i < interactionPoints.Length; i++)
         {
             if (interactionPoints[i] != null)
+            {
                 interactionPoints[i].position = shuffled[i].position;
+                savedPositions[i] = shuffled[i].position;
+            }
         }
+    }
+
+    void ApplyUsedState()
+    {
+        int activeCount = 0;
+        for (int i = 0; i < interactionPoints.Length; i++)
+        {
+            if (interactionPoints[i] == null) continue;
+
+            if (usedIndices.Contains(i))
+                interactionPoints[i].gameObject.SetActive(false);
+            else
+                activeCount++;
+        }
+
+        if (activeCount == 0 && GameTimer.Instance != null)
+            GameTimer.Instance.TriggerEnd();
     }
 }

@@ -14,6 +14,12 @@ public class WinManager : MonoBehaviour
     // Scores statiques persistants
     public static int scoreJ1 = 0, scoreJ2 = 0;
 
+    // Retour après minijeu
+    public static string returnScene = "";
+    public static Vector3 savedPositionJ1 = Vector3.zero;
+    public static Vector3 savedPositionJ2 = Vector3.zero;
+    public static bool hasSavedPositions = false;
+
     private Canvas canvasJ1, canvasJ2;
     private TextMeshProUGUI textJ1, textJ2;
     private bool isGameOver = false;
@@ -60,6 +66,24 @@ public class WinManager : MonoBehaviour
             textJ2 = p2.GetComponentInChildren<TextMeshProUGUI>(true);
             p2.SetActive(false);
         }
+
+        if (hasSavedPositions && scene.name == returnScene)
+            StartCoroutine(RestorePlayerPositions());
+    }
+
+    IEnumerator RestorePlayerPositions()
+    {
+        yield return null; // attendre un frame que la scène soit initialisée
+
+        foreach (var p in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            if (p.name.Contains("1")) p.transform.position = savedPositionJ1;
+            else if (p.name.Contains("2")) p.transform.position = savedPositionJ2;
+        }
+
+        hasSavedPositions = false;
+        savedPositionJ1 = savedPositionJ2 = Vector3.zero;
+        returnScene = "";
     }
 
     public void ShowVictory(int winnerId)
@@ -94,6 +118,10 @@ public class WinManager : MonoBehaviour
     IEnumerator WaitAndRedirect()
     {
         yield return new WaitForSeconds(delayBeforeRedirection);
-        SceneManager.LoadScene(mainSceneName);
+        if (canvasJ1) canvasJ1.gameObject.SetActive(false);
+        if (canvasJ2) canvasJ2.gameObject.SetActive(false);
+        string target = string.IsNullOrEmpty(returnScene) ? mainSceneName : returnScene;
+        // returnScene est conservé pour la comparaison dans OnSceneLoaded, il sera vidé après restauration
+        SceneManager.LoadScene(target);
     }
 }

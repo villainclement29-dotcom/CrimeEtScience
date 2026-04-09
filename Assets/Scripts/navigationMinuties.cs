@@ -37,6 +37,9 @@ public class MinutiesNavigator : MonoBehaviour
     private InputDevice playerDevice;
     private int[] choixJoueur;
 
+    private bool stickUsed = false;
+    private const float stickThreshold = 0.5f;
+
     void Start()
     {
         choixJoueur = new int[stations.Length];
@@ -149,20 +152,83 @@ public class MinutiesNavigator : MonoBehaviour
 
     void GererNavigationStations()
     {
-        bool r = false; bool l = false;
+        Vector2 dir = Vector2.zero;
+
         if (playerDevice is Gamepad pad)
         {
-            r = pad.dpad.right.wasPressedThisFrame || pad.leftStick.right.wasPressedThisFrame;
-            l = pad.dpad.left.wasPressedThisFrame || pad.leftStick.left.wasPressedThisFrame;
+            Vector2 stick = pad.leftStick.ReadValue();
+            if (stick.magnitude > stickThreshold && !stickUsed)
+            {
+                dir = stick;
+                stickUsed = true;
+            }
+            else if (stick.magnitude <= stickThreshold)
+            {
+                stickUsed = false;
+            }
+
+            // D-pad en fallback
+            if (pad.dpad.right.wasPressedThisFrame) dir = Vector2.right;
+            else if (pad.dpad.left.wasPressedThisFrame)  dir = Vector2.left;
+            else if (pad.dpad.up.wasPressedThisFrame)    dir = Vector2.up;
+            else if (pad.dpad.down.wasPressedThisFrame)  dir = Vector2.down;
         }
         else if (playerDevice is Keyboard kb)
         {
-            // Correction ici aussi pour utiliser playerIndex 0 et 1
-            r = (playerIndex == 0) ? kb.rightArrowKey.wasPressedThisFrame : kb.dKey.wasPressedThisFrame;
-            l = (playerIndex == 0) ? kb.leftArrowKey.wasPressedThisFrame : kb.qKey.wasPressedThisFrame;
+            if (playerIndex == 0)
+            {
+                if (kb.rightArrowKey.wasPressedThisFrame) dir = Vector2.right;
+                else if (kb.leftArrowKey.wasPressedThisFrame)  dir = Vector2.left;
+                else if (kb.upArrowKey.wasPressedThisFrame)    dir = Vector2.up;
+                else if (kb.downArrowKey.wasPressedThisFrame)  dir = Vector2.down;
+            }
+            else
+            {
+                if (kb.dKey.wasPressedThisFrame) dir = Vector2.right;
+                else if (kb.qKey.wasPressedThisFrame) dir = Vector2.left;
+                else if (kb.zKey.wasPressedThisFrame) dir = Vector2.up;
+                else if (kb.sKey.wasPressedThisFrame) dir = Vector2.down;
+            }
         }
-        if (r) { currentIndex = (currentIndex + 1) % stations.Length; ActualiserPosition(); }
-        if (l) { currentIndex = (currentIndex - 1 + stations.Length) % stations.Length; ActualiserPosition(); }
+
+        if (dir != Vector2.zero)
+        {
+            int target = FindNearestInDirection(dir);
+            if (target >= 0)
+            {
+                currentIndex = target;
+                ActualiserPosition();
+            }
+        }
+    }
+
+    // Trouve la station la plus proche dans la direction donnée, en fonction
+    // de la position réelle des RectTransform sur l'écran.
+    int FindNearestInDirection(Vector2 dir)
+    {
+        Vector2 currentPos = stations[currentIndex].localPosition;
+        int best = -1;
+        float bestScore = float.MinValue;
+
+        for (int i = 0; i < stations.Length; i++)
+        {
+            if (i == currentIndex) continue;
+            Vector2 toStation = (Vector2)stations[i].localPosition - currentPos;
+            float dot = Vector2.Dot(toStation.normalized, dir.normalized);
+
+            // On ne considère que les stations dans un cône de 60° autour de la direction
+            if (dot > 0.5f)
+            {
+                // Favorise l'alignement avec la direction, puis la proximité
+                float score = dot / toStation.magnitude;
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    best = i;
+                }
+            }
+        }
+        return best;
     }
 
     void GererNavigationMenu()
