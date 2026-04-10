@@ -86,7 +86,6 @@ public class GameTimer : MonoBehaviour
 
         if (remaining <= 0f)
         {
-            remaining = 0f;
             TriggerEnd();
             return;
         }
@@ -111,7 +110,8 @@ public class GameTimer : MonoBehaviour
         gameOver = true;
 
         // Bonus = secondes restantes offertes au joueur en tête
-        int bonus = Mathf.RoundToInt(remaining);
+        int bonus = Mathf.RoundToInt(Mathf.Max(0f, remaining));
+        remaining = 0f;
         if (WinManager.scoreJ1 > WinManager.scoreJ2)
             WinManager.scoreJ1 += bonus;
         else if (WinManager.scoreJ2 > WinManager.scoreJ1)

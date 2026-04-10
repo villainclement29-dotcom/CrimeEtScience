@@ -521,6 +521,7 @@ GameObject:
   - component: {fileID: 364151755}
   - component: {fileID: 364151752}
   - component: {fileID: 364151756}
+  - component: {fileID: 364151757}
   m_Layer: 0
   m_Name: GlobalPlayerManager
   m_TagString: Untagged
@@ -570,6 +571,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainSceneName: Lobby
   delayBeforeRedirection: 3
+--- !u!114 &364151757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 364151751}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3851f68279b5d544ca6a13dedcfab400, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lobbySceneName: Lobby
 --- !u!1 &436005844
 GameObject:
   m_ObjectHideFlags: 0
@@ -735,7 +749,7 @@ VideoPlayer:
   m_TargetAudioSources:
   - {fileID: 0}
   m_DirectAudioVolumes:
-  - 1
+  - 0.495
   m_Url: 
   m_EnabledAudioTracks: 01
   m_DirectAudioMutes: 00
@@ -1262,7 +1276,7 @@ VideoPlayer:
   m_TargetAudioSources:
   - {fileID: 0}
   m_DirectAudioVolumes:
-  - 1
+  - 0.516
   m_Url: 
   m_EnabledAudioTracks: 01
   m_DirectAudioMutes: 00
