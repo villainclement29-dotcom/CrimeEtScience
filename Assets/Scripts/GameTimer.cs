@@ -124,6 +124,7 @@ public class GameTimer : MonoBehaviour
     IEnumerator RedirectToLobby()
     {
         yield return new WaitForSeconds(delayBeforeRedirection);
+        WinManager.TrySaveBestScore(Mathf.Max(WinManager.scoreJ1, WinManager.scoreJ2));
         WinManager.scoreJ1 = 0;
         WinManager.scoreJ2 = 0;
         HideOverlays();

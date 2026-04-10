@@ -14,6 +14,18 @@ public class WinManager : MonoBehaviour
     // Scores statiques persistants
     public static int scoreJ1 = 0, scoreJ2 = 0;
 
+    // ── Meilleur score all-time (PlayerPrefs) ─────────────────────────
+    const string BEST_SCORE_KEY = "BestScore";
+    public static int  GetBestScore() => PlayerPrefs.GetInt(BEST_SCORE_KEY, 0);
+    public static void TrySaveBestScore(int score)
+    {
+        if (score > GetBestScore())
+        {
+            PlayerPrefs.SetInt(BEST_SCORE_KEY, score);
+            PlayerPrefs.Save();
+        }
+    }
+
     // Retour après minijeu
     public static string returnScene = "";
     public static Vector3 savedPositionJ1 = Vector3.zero;
