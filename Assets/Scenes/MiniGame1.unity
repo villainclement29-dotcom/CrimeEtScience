@@ -268,7 +268,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.21788065, y: 0.46100003}
   m_AnchorMax: {x: 0.21788065, y: 0.46100003}
-  m_AnchoredPosition: {x: 2, y: -1}
+  m_AnchoredPosition: {x: 1.999999, y: -1}
   m_SizeDelta: {x: 132.89, y: 132.89}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &39682111
@@ -2236,7 +2236,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: " - Le crochet : Une petite branche tr\xE8s courte qui part d'une ligne
-    principale mais qui s'arr\xEAte sans rejoindre d'autre ligne."
+    principale mais qui s'arr\xEAte sans rejoindre d'autres lignes."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 21a6181fdff11fb47975aad810f532d6, type: 2}
   m_sharedMaterial: {fileID: 3761781983607400658, guid: 21a6181fdff11fb47975aad810f532d6,
@@ -3598,7 +3598,7 @@ MonoBehaviour:
   solutionsCorrectes: 00000000020000000100000003000000
   hoverClip: {fileID: 8300000, guid: 3ee09e6dd062ee44d839fe17246ea927, type: 3}
   scanClip: {fileID: 8300000, guid: e8720407f1ec46d40a891684ec7e0be0, type: 3}
-  sfxVolume: 0.4
+  sfxVolume: 0.503
 --- !u!4 &755876318
 Transform:
   m_ObjectHideFlags: 0
@@ -3932,7 +3932,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: " - Le crochet : Une petite branche tr\xE8s courte qui part d'une ligne
-    principale mais qui s'arr\xEAte sans rejoindre d'autre ligne."
+    principale mais qui s'arr\xEAte sans rejoindre d'autres lignes."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 21a6181fdff11fb47975aad810f532d6, type: 2}
   m_sharedMaterial: {fileID: 3761781983607400658, guid: 21a6181fdff11fb47975aad810f532d6,
@@ -6151,7 +6151,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -238.16997, y: 5.5999756}
+  m_AnchoredPosition: {x: -238.16998, y: 5.5999756}
   m_SizeDelta: {x: -530.2, y: -66.3}
   m_Pivot: {x: 0.49999976, y: 0.5}
 --- !u!114 &1296813090
@@ -7435,7 +7435,7 @@ MonoBehaviour:
   solutionsCorrectes: 00000000020000000100000003000000
   hoverClip: {fileID: 8300000, guid: 3ee09e6dd062ee44d839fe17246ea927, type: 3}
   scanClip: {fileID: 8300000, guid: e8720407f1ec46d40a891684ec7e0be0, type: 3}
-  sfxVolume: 0.401
+  sfxVolume: 0.513
 --- !u!1 &1598257073
 GameObject:
   m_ObjectHideFlags: 0

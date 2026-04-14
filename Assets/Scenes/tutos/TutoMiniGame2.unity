@@ -1385,7 +1385,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "votre bute est d'\xEAtre le premier \xE0 photographier tous ces \xE9l\xE9ments."
+  m_text: "votre but est d'\xEAtre le premier \xE0 photographier tous ces \xE9l\xE9ments."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 21a6181fdff11fb47975aad810f532d6, type: 2}
   m_sharedMaterial: {fileID: 3761781983607400658, guid: 21a6181fdff11fb47975aad810f532d6,
@@ -5073,7 +5073,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "votre bute est d'\xEAtre le premier \xE0 photographier tous ces \xE9l\xE9ments."
+  m_text: "votre but est d'\xEAtre le premier \xE0 photographier tous ces \xE9l\xE9ments."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 21a6181fdff11fb47975aad810f532d6, type: 2}
   m_sharedMaterial: {fileID: 3761781983607400658, guid: 21a6181fdff11fb47975aad810f532d6,

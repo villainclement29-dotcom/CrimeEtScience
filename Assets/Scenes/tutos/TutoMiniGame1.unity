@@ -2881,8 +2881,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 85.999954, y: -84}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 82.56, y: -84}
+  m_SizeDelta: {x: 193.13, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &799565331
 MonoBehaviour:
@@ -2904,8 +2904,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "votre bute est d'identifi\xE9 des paternes communs aux empreintes appel\xE9s
-    minuties sur l'empreinte retrouv\xE9 dans l'appartement de Clara."
+  m_text: "votre but est d'identifier des paternes communs aux empreintes appel\xE9es
+    minuties sur l'empreinte retrouv\xE9e dans l'appartement de Clara."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 21a6181fdff11fb47975aad810f532d6, type: 2}
   m_sharedMaterial: {fileID: 3761781983607400658, guid: 21a6181fdff11fb47975aad810f532d6,
@@ -2971,7 +2971,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: -35.75508, y: 0, z: -7.2150116, w: 0}
+  m_margin: {x: -35.75508, y: 0, z: 9.386093, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -5599,8 +5599,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "votre bute est d'identifi\xE9 des paternes communs aux empreintes appel\xE9s
-    minuties sur l'empreinte retrouv\xE9 dans l'appartement de Clara."
+  m_text: "votre but est d'identifi\xE9 des paternes communs aux empreintes appel\xE9es
+    minuties sur l'empreinte retrouv\xE9e dans l'appartement de Clara."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 21a6181fdff11fb47975aad810f532d6, type: 2}
   m_sharedMaterial: {fileID: 3761781983607400658, guid: 21a6181fdff11fb47975aad810f532d6,
