@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Users; // Nécessaire pour le couplage de périphériques
-using UnityEngine.Rendering.Universal;
+using UnityEngine.InputSystem.Users;
 using System.Collections;
 
 namespace Cainos.PixelArtTopDown_Basic
@@ -9,19 +8,13 @@ namespace Cainos.PixelArtTopDown_Basic
     public class PoliceManMovements : MonoBehaviour
     {
         [Header("Configuration")]
-        public int playerId = 0; // 0 pour le joueur de gauche, 1 pour celui de droite
+        public int playerId = 0; 
         public float speed = 3f;
 
-        [Header("Sprites de direction")]
-        public Sprite spriteUp;
-        public Sprite spriteDown;
-        public Sprite spriteLeft;
-        public Sprite spriteRight;
-
         [Header("Bruits de Pas")]
-        public AudioClip[] footstepClips;   // Mets 2-3 clips différents pour plus de variété
+        public AudioClip[] footstepClips;   
         [Range(0f, 1f)] public float footstepVolume = 0.4f;
-        public float footstepInterval = 0.35f; // secondes entre chaque pas
+        public float footstepInterval = 0.35f; 
         [Range(0f, 0.3f)] public float pitchVariation = 0.15f;
         [Range(0f, 0.2f)] public float volumeVariation = 0.1f;
         private AudioSource footstepSource;
@@ -30,8 +23,6 @@ namespace Cainos.PixelArtTopDown_Basic
 
         [Header("Système de Lampe Torche")]
         public GameObject flashlight;
-
-        [Tooltip("Glisse ici les 4 objets vides 'Anchor' créés sous le joueur")]
         public Transform anchorUp;
         public Transform anchorDown;
         public Transform anchorLeft;
@@ -42,63 +33,60 @@ namespace Cainos.PixelArtTopDown_Basic
         private Vector2 moveInput;
         private PlayerInput playerInput;
 
+        private Animator _animator;
+        private const string _horizontal = "Horizontal";
+        private const string _vertical = "Vertical";
+        private const string _lastHorizontal = "lastHorizontal";
+        private const string _lastVertical = "lastVertical";
+
+
+        private void Awake()
+        {
+            _animator = GetComponent<Animator>();
+        }
+
         private void Start()
         {
             rb = GetComponent<Rigidbody2D>();
             sr = GetComponent<SpriteRenderer>();
             playerInput = GetComponent<PlayerInput>();
 
-            // --- LOGIQUE D'ASSIGNATION DE LA MANETTE ---
+            // --- LIAISON MANETTE ---
             if (playerInput != null && GlobalPlayerManager.Instance != null)
             {
-                // On récupère le périphérique stocké dans le Manager selon l'ID
                 InputDevice targetDevice = (playerId == 0) ?
                     GlobalPlayerManager.Instance.Player1Device :
                     GlobalPlayerManager.Instance.Player2Device;
 
                 if (targetDevice != null)
                 {
-                    // 1. On retire toutes les manettes assignées par défaut
                     playerInput.user.UnpairDevices();
-
-                    // 2. On "marie" spécifiquement ce personnage avec la bonne manette
                     InputUser.PerformPairingWithDevice(targetDevice, playerInput.user);
-
-                    Debug.Log($"<color=magenta>[PoliceMovements]</color> Joueur {playerId} lié à : {targetDevice.displayName}");
-                }
-                else
-                {
-                    Debug.LogWarning($"<color=red>[PoliceMovements]</color> Aucune manette trouvée pour le Joueur {playerId} dans le GlobalPlayerManager !");
                 }
             }
 
-            // AudioSource pour les bruits de pas
+            // AudioSource
             footstepSource = gameObject.AddComponent<AudioSource>();
-            footstepSource.loop        = false;
-            footstepSource.volume      = footstepVolume;
-            footstepSource.spatialBlend = 0f;
             footstepSource.playOnAwake = false;
 
-            // Désactive la gravité pour le top-down
             if (rb != null) rb.gravityScale = 0;
 
-            // Application des sprites du personnage sélectionné dans le lobby
-            CharacterData cd = playerId == 0
-                ? CharacterSelectionData.J1Data
-                : CharacterSelectionData.J2Data;
-
-            if (cd != null)
+            // --- CHARGEMENT DES DONNÉES JOUEUR ---
+            // On ne change PAS le sr.sprite ici pour laisser l'Animator respirer.
+            // L'Animator de chaque joueur est figé sur sa feuille de sprites (terrain ou labo),
+            // quel que soit le personnage choisi au Lobby. Pour éviter des tailles incohérentes
+            // (ex: feuille terrain multipliée par le scale du labo), on normalise la taille
+            // visuelle d'après la hauteur réelle du sprite courant.
+            const float TARGET_HEIGHT = 1.4f;
+            float normalized = 1.2f;
+            if (sr != null && sr.sprite != null)
             {
-                if (cd.spriteDown  != null) spriteDown  = cd.spriteDown;
-                if (cd.spriteUp    != null) spriteUp    = cd.spriteUp;
-                if (cd.spriteLeft  != null) spriteLeft  = cd.spriteLeft;
-                if (cd.spriteRight != null) spriteRight = cd.spriteRight;
-                if (cd.spriteDown  != null && sr != null) sr.sprite = cd.spriteDown;
-                if (cd.scale > 0f)
-                    transform.localScale = Vector3.one * cd.scale;
+                float h = sr.sprite.bounds.size.y;
+                if (h > 0.01f) normalized = TARGET_HEIGHT / h;
             }
+            transform.localScale = Vector3.one * normalized;
 
-            // Positionnement initial de la lampe
+            // Position initiale lampe
             if (flashlight != null && anchorDown != null)
             {
                 flashlight.transform.position = anchorDown.position;
@@ -106,7 +94,6 @@ namespace Cainos.PixelArtTopDown_Basic
             }
         }
 
-        // Action déclenchée par le bouton 'A' (Input System Message)
         public void OnPhoto(InputValue value)
         {
             if (flashlight != null && value.isPressed)
@@ -115,7 +102,6 @@ namespace Cainos.PixelArtTopDown_Basic
             }
         }
 
-        // Action de mouvement (Input System Message)
         public void OnMove(InputValue value)
         {
             moveInput = value.Get<Vector2>();
@@ -123,14 +109,20 @@ namespace Cainos.PixelArtTopDown_Basic
 
         private void Update()
         {
-            UpdateSpriteAndFlashlight(moveInput);
+            UpdateFlashlightDirection(moveInput);
             UpdateFootsteps();
 
             if (rb != null)
             {
-                // Note: 'linearVelocity' est pour les versions récentes d'Unity (2023+). 
-                // Si tu es sur une version plus ancienne, utilise : rb.velocity = moveInput * speed;
+                // Utilise .velocity si tu es sur une version d'Unity plus ancienne que 2023
                 rb.linearVelocity = moveInput * speed;
+            }
+            _animator.SetFloat(_horizontal, moveInput.x);
+            _animator.SetFloat(_vertical, moveInput.y);
+            if (moveInput != Vector2.zero)
+            {
+                _animator.SetFloat(_lastHorizontal, moveInput.x);
+                _animator.SetFloat(_lastVertical, moveInput.y);
             }
         }
 
@@ -147,15 +139,11 @@ namespace Cainos.PixelArtTopDown_Basic
                     footstepTimer = footstepInterval;
                 }
             }
-            else
-            {
-                footstepTimer = 0f; // reset pour que le prochain pas soit immédiat
-            }
+            else { footstepTimer = 0f; }
         }
 
         private void PlayFootstep()
         {
-            // Choisit un clip différent du précédent
             int index = lastClipIndex;
             if (footstepClips.Length > 1)
             {
@@ -168,40 +156,24 @@ namespace Cainos.PixelArtTopDown_Basic
             AudioClip clip = footstepClips[index];
             if (clip == null) return;
 
-            footstepSource.pitch  = 1f + Random.Range(-pitchVariation, pitchVariation);
-            footstepSource.volume = footstepVolume + Random.Range(-volumeVariation, volumeVariation);
+            footstepSource.pitch = 1f + Random.Range(-pitchVariation, pitchVariation);
             footstepSource.PlayOneShot(clip);
         }
 
-        private void UpdateSpriteAndFlashlight(Vector2 dir)
+        // On a renommé la fonction : elle ne gère QUE la lampe maintenant
+        private void UpdateFlashlightDirection(Vector2 dir)
         {
             if (dir.magnitude < 0.1f) return;
 
             if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
             {
-                if (dir.x > 0)
-                {
-                    sr.sprite = spriteRight;
-                    AttachFlashlight(anchorRight, new Vector3(0, 0, -90));
-                }
-                else
-                {
-                    sr.sprite = spriteLeft;
-                    AttachFlashlight(anchorLeft, new Vector3(0, 0, 90));
-                }
+                if (dir.x > 0) AttachFlashlight(anchorRight, new Vector3(0, 0, -90));
+                else           AttachFlashlight(anchorLeft, new Vector3(0, 0, 90));
             }
             else
             {
-                if (dir.y > 0)
-                {
-                    sr.sprite = spriteUp;
-                    AttachFlashlight(anchorUp, new Vector3(0, 0, 0));
-                }
-                else
-                {
-                    sr.sprite = spriteDown;
-                    AttachFlashlight(anchorDown, new Vector3(0, 0, 180));
-                }
+                if (dir.y > 0) AttachFlashlight(anchorUp, new Vector3(0, 0, 0));
+                else           AttachFlashlight(anchorDown, new Vector3(0, 0, 180));
             }
         }
 

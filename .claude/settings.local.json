@@ -30,7 +30,18 @@
       "mcp__ai-game-developer__scene-save",
       "Bash(node -e ':*)",
       "mcp__ai-game-developer__gameobject-destroy",
-      "mcp__ai-game-developer__console-get-logs"
+      "mcp__ai-game-developer__console-get-logs",
+      "mcp__ai-game-developer__assets-find",
+      "mcp__ai-game-developer__assets-find-built-in",
+      "mcp__ai-game-developer__scene-open",
+      "mcp__ai-game-developer__assets-get-data",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\clement\\\\Documents\\\\clément\\\\MMI3\\\\Unity\\\\CrimeEtScience\" -Directory)",
+      "Bash(Select-Object Name)",
+      "mcp__ai-game-developer__scene-create",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\clement\\\\Documents\\\\clément\\\\MMI3\\\\Unity\\\\CrimeEtScience\\\\Assets\\\\Scripts\" -Filter \"*.cs\")",
+      "Bash(Select-Object -ExpandProperty Name)",
+      "Bash(Find C:\\\\Users\\\\clement\\\\Documents\\\\clément\\\\MMI3\\\\Unity\\\\CrimeEtScience\\\\Assets\\\\Scripts *)",
+      "Bash(Find \"C:\\\\Users\\\\clement\\\\Documents\\\\clément\\\\MMI3\\\\Unity\\\\CrimeEtScience\\\\Assets\" -name \"*.unity\" -type f)"
     ]
   },
   "enableAllProjectMcpServers": true,
