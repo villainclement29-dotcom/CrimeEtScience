@@ -568,7 +568,7 @@ public class LobbyController : MonoBehaviour
     {
         if (videoPlayer_D1 == null || videoPlayer_D2 == null)
         {
-            SceneManager.LoadScene(nextSceneName);
+            SceneTransitionManager.LoadScene(nextSceneName);
             yield break;
         }
 
@@ -593,6 +593,6 @@ public class LobbyController : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         while (videoPlayer_D1.isPlaying) yield return null;
 
-        SceneManager.LoadScene(nextSceneName);
+        SceneTransitionManager.LoadScene(nextSceneName);
     }
 }

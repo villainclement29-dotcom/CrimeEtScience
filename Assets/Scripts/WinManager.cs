@@ -134,6 +134,6 @@ public class WinManager : MonoBehaviour
         if (canvasJ2) canvasJ2.gameObject.SetActive(false);
         string target = string.IsNullOrEmpty(returnScene) ? mainSceneName : returnScene;
         // returnScene est conservé pour la comparaison dans OnSceneLoaded, il sera vidé après restauration
-        SceneManager.LoadScene(target);
+        SceneTransitionManager.LoadScene(target);
     }
 }

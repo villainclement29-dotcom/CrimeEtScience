@@ -129,7 +129,7 @@ public class StartMenuController : MonoBehaviour
         {
             PseudoJ1 = kbTexts[0].Length > 0 ? kbTexts[0] : "Joueur 1";
             PseudoJ2 = kbTexts[1].Length > 0 ? kbTexts[1] : "Joueur 2";
-            SceneManager.LoadScene(lobbySceneName);
+            SceneTransitionManager.LoadScene(lobbySceneName);
         }
     }
 

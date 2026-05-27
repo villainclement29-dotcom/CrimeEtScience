@@ -130,7 +130,7 @@ public class GameTimer : MonoBehaviour
         HideOverlays();
         DestroyTimerUI();
         InteractionPointRandomizer.ResetSavedPositions();
-        SceneManager.LoadScene(lobbySceneName);
+        SceneTransitionManager.LoadScene(lobbySceneName);
     }
 
     void DestroyTimerUI()

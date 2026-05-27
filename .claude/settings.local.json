@@ -41,7 +41,13 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\clement\\\\Documents\\\\clément\\\\MMI3\\\\Unity\\\\CrimeEtScience\\\\Assets\\\\Scripts\" -Filter \"*.cs\")",
       "Bash(Select-Object -ExpandProperty Name)",
       "Bash(Find C:\\\\Users\\\\clement\\\\Documents\\\\clément\\\\MMI3\\\\Unity\\\\CrimeEtScience\\\\Assets\\\\Scripts *)",
-      "Bash(Find \"C:\\\\Users\\\\clement\\\\Documents\\\\clément\\\\MMI3\\\\Unity\\\\CrimeEtScience\\\\Assets\" -name \"*.unity\" -type f)"
+      "Bash(Find \"C:\\\\Users\\\\clement\\\\Documents\\\\clément\\\\MMI3\\\\Unity\\\\CrimeEtScience\\\\Assets\" -name \"*.unity\" -type f)",
+      "Bash(Get-ChildItem -Path \"Assets\" -Filter \"*.unity\" -Recurse)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(xargs basename -a)",
+      "Bash(Select-String -Path \"Assets\\\\Scenes\\\\tutos\\\\TutoMiniGame1.unity\" -Pattern \"m_Text:\")",
+      "Bash(Select-Object -First 20)",
+      "PowerShell(Copy-Item *)"
     ]
   },
   "enableAllProjectMcpServers": true,

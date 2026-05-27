@@ -43,7 +43,7 @@ public class VideoTransitionHandler : MonoBehaviour
         if (videoPlayer_D1 == null || videoPlayer_D2 == null || videoDisplay_D1 == null || videoDisplay_D2 == null)
         {
             Debug.LogWarning($"[Transition] Composants manquants pour le double écran sur {gameObject.name}. Chargement direct.");
-            SceneManager.LoadScene(sceneName);
+            SceneTransitionManager.LoadScene(sceneName);
             return;
         }
 
@@ -90,6 +90,6 @@ public class VideoTransitionHandler : MonoBehaviour
         }
 
         // 7. Changer de scène
-        SceneManager.LoadScene(sceneName);
+        SceneTransitionManager.LoadScene(sceneName);
     }
 }

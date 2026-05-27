@@ -203,7 +203,7 @@ public class PauseMenu : MonoBehaviour
         WinManager.scoreJ2 = 0;
         DestroyMenuUI();
         InteractionPointRandomizer.ResetSavedPositions();
-        SceneManager.LoadScene(lobbySceneName);
+        SceneTransitionManager.LoadScene(lobbySceneName);
     }
 
     void ShowScore()

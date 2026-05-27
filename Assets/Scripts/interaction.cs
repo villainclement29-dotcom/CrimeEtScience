@@ -90,7 +90,7 @@ public class SceneChanger : MonoBehaviour
         if (transitionHandler != null)
             transitionHandler.StartTransition(sceneToLoad);
         else
-            SceneManager.LoadScene(sceneToLoad);
+            SceneTransitionManager.LoadScene(sceneToLoad);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
