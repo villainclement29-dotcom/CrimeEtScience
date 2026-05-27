@@ -30,8 +30,7 @@ public class ScoreBoardDisplay : MonoBehaviour
         foreach (var c in children)
             Destroy(c.gameObject);
 
-        var img = GetComponent<Image>();
-        if (img != null) img.enabled = false;
+        // Garde l'image de fond du Panel
 
         textJ1 = null;
         textJ2 = null;
