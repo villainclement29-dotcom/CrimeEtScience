@@ -14,10 +14,10 @@ using TMPro;
 /// </summary>
 public class PauseMenu : MonoBehaviour
 {
-    public static PauseMenu Instance { get; private set; }
+    public static PauseMenu Instance { get; set; }
 
     [Header("Navigation")]
-    public string lobbySceneName = "Lobby";
+    public string startMenuSceneName = "StartMenu";
 
     // ── Index des éléments navigables ────────────────────────────────
     const int ITEM_SLIDER = 0;
@@ -167,7 +167,7 @@ public class PauseMenu : MonoBehaviour
         switch (selectedIndex)
         {
             case ITEM_RETOUR: Resume();      break;
-            case ITEM_MENU:   GoToLobby();   break;
+            case ITEM_MENU:   GoToStartMenu();   break;
             case ITEM_SCORE:  ShowScore();   break;
         }
     }
@@ -195,15 +195,48 @@ public class PauseMenu : MonoBehaviour
 
     // ── Actions ───────────────────────────────────────────────────────
 
-    void GoToLobby()
+    void GoToStartMenu()
     {
         isPaused = false;
         Time.timeScale = 1f;
+
+        WinManager.AddLeaderboardEntry(StartMenuController.PseudoJ1, WinManager.scoreJ1);
+        WinManager.AddLeaderboardEntry(StartMenuController.PseudoJ2, WinManager.scoreJ2);
+
         WinManager.scoreJ1 = 0;
         WinManager.scoreJ2 = 0;
+        StartMenuController.PseudoJ1 = "Joueur 1";
+        StartMenuController.PseudoJ2 = "Joueur 2";
+
         DestroyMenuUI();
         InteractionPointRandomizer.ResetSavedPositions();
-        SceneTransitionManager.LoadScene(lobbySceneName);
+
+        if (WinManager.Instance != null)
+        {
+            WinManager.Instance.StopAllCoroutines();
+            Destroy(WinManager.Instance.gameObject);
+            WinManager.Instance = null;
+        }
+        if (GameTimer.Instance != null)
+        {
+            Destroy(GameTimer.Instance.gameObject);
+            GameTimer.Instance = null;
+        }
+        if (MinimapController.Instance != null)
+        {
+            Destroy(MinimapController.Instance.gameObject);
+            MinimapController.Instance = null;
+        }
+        if (GlobalPlayerManager.Instance != null)
+        {
+            Destroy(GlobalPlayerManager.Instance.gameObject);
+            GlobalPlayerManager.Instance = null;
+        }
+
+        SceneTransitionManager.LoadScene(startMenuSceneName);
+
+        Instance = null;
+        Destroy(gameObject);
     }
 
     void ShowScore()
@@ -360,7 +393,7 @@ public class PauseMenu : MonoBehaviour
         // Bouton Menu (item 1) — haut
         itemBg[displayIdx][ITEM_MENU] = AddButton(panelGO.transform, "BtnMenu", "Menu",
             new Vector2(0.04f, 0.30f), new Vector2(0.96f, 0.43f),
-            GetItemColor(ITEM_MENU, selectedIndex == ITEM_MENU), GoToLobby);
+            GetItemColor(ITEM_MENU, selectedIndex == ITEM_MENU), GoToStartMenu);
 
         // Bouton Score (item 2) — milieu
         itemBg[displayIdx][ITEM_SCORE] = AddButton(panelGO.transform, "BtnScore", "Score",

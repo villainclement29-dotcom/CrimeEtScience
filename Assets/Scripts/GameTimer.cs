@@ -12,13 +12,13 @@ using TMPro;
 /// </summary>
 public class GameTimer : MonoBehaviour
 {
-    public static GameTimer Instance { get; private set; }
+    public static GameTimer Instance { get; set; }
 
     [Header("Durée du jeu (secondes)")]
     public float totalTime = 420f; // 7 minutes
 
     [Header("Navigation")]
-    public string lobbySceneName = "Lobby";
+    public string startMenuSceneName = "StartMenu";
     public string mainSceneName  = "MainScene";
     public float delayBeforeRedirection = 6f;
 
@@ -118,19 +118,54 @@ public class GameTimer : MonoBehaviour
             WinManager.scoreJ2 += bonus;
 
         ShowEndOverlay(WinManager.scoreJ1, WinManager.scoreJ2);
-        StartCoroutine(RedirectToLobby());
+        StartCoroutine(RedirectToStartMenu());
     }
 
-    IEnumerator RedirectToLobby()
+    IEnumerator RedirectToStartMenu()
     {
         yield return new WaitForSeconds(delayBeforeRedirection);
-        WinManager.TrySaveBestScore(Mathf.Max(WinManager.scoreJ1, WinManager.scoreJ2));
+
+        // Sauvegarde leaderboard
+        WinManager.AddLeaderboardEntry(StartMenuController.PseudoJ1, WinManager.scoreJ1);
+        WinManager.AddLeaderboardEntry(StartMenuController.PseudoJ2, WinManager.scoreJ2);
+
+        // Reset scores et pseudos
         WinManager.scoreJ1 = 0;
         WinManager.scoreJ2 = 0;
+        StartMenuController.PseudoJ1 = "Joueur 1";
+        StartMenuController.PseudoJ2 = "Joueur 2";
+
         HideOverlays();
         DestroyTimerUI();
         InteractionPointRandomizer.ResetSavedPositions();
-        SceneTransitionManager.LoadScene(lobbySceneName);
+
+        // Destruction des singletons de gameplay
+        if (WinManager.Instance != null)
+        {
+            WinManager.Instance.StopAllCoroutines();
+            Destroy(WinManager.Instance.gameObject);
+            WinManager.Instance = null;
+        }
+        if (PauseMenu.Instance != null)
+        {
+            Destroy(PauseMenu.Instance.gameObject);
+            PauseMenu.Instance = null;
+        }
+        if (MinimapController.Instance != null)
+        {
+            Destroy(MinimapController.Instance.gameObject);
+            MinimapController.Instance = null;
+        }
+        if (GlobalPlayerManager.Instance != null)
+        {
+            Destroy(GlobalPlayerManager.Instance.gameObject);
+            GlobalPlayerManager.Instance = null;
+        }
+
+        SceneTransitionManager.LoadScene(startMenuSceneName);
+
+        Instance = null;
+        Destroy(gameObject);
     }
 
     void DestroyTimerUI()

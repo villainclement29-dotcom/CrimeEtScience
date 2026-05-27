@@ -246,7 +246,7 @@ GameObject:
   - component: {fileID: 4417916869648907861}
   - component: {fileID: 2996409535372859237}
   m_Layer: 5
-  m_Name: journal
+  m_Name: carnet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -299,7 +299,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: ' - Journal'
+  m_text: ' - Carnet'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 21a6181fdff11fb47975aad810f532d6, type: 2}
   m_sharedMaterial: {fileID: 3761781983607400658, guid: 21a6181fdff11fb47975aad810f532d6,

@@ -18,17 +18,15 @@ public class TutorialReadySystem : MonoBehaviour
     static bool dialogueCreated;
     static TutorialReadySystem primary;
 
-    enum Phase { Dialogue, Ready }
-    Phase phase = Phase.Dialogue;
-
     string[] dialogueLines;
-    int currentLine;
     bool isJ1Ready, isJ2Ready, isStarting;
-    bool isTyping;
-    string fullLineText;
-    int typedChars;
-    float typeTimer;
     float typeSpeed = 0.03f;
+
+    int[] currentLine = new int[2];
+    bool[] isTyping = new bool[2];
+    int[] typedChars = new int[2];
+    float[] typeTimer = new float[2];
+    bool[] dialogueDone = new bool[2];
 
     Sprite chiefSprite;
     GameObject[] canvases = new GameObject[2];
@@ -58,7 +56,8 @@ public class TutorialReadySystem : MonoBehaviour
         for (int d = 0; d < 2; d++)
             BuildCanvas(d);
 
-        ShowLine();
+        for (int p = 0; p < 2; p++)
+            ShowLine(p);
     }
 
     void OnDestroy()
@@ -315,60 +314,50 @@ public class TutorialReadySystem : MonoBehaviour
         readyTexts[d] = tmp;
     }
 
-    // ── Dialogue Logic ───────────────────────────────────────────────
+    // ── Dialogue Logic (per player) ─────────────────────────────────
 
-    void ShowLine()
+    void ShowLine(int p)
     {
         if (dialogueLines == null || dialogueLines.Length == 0) return;
-        fullLineText = dialogueLines[currentLine];
-        typedChars = 0;
-        typeTimer = 0f;
-        isTyping = true;
+        string line = dialogueLines[currentLine[p]];
+        typedChars[p] = 0;
+        typeTimer[p] = 0f;
+        isTyping[p] = true;
 
-        for (int d = 0; d < 2; d++)
-        {
-            if (dialogueTexts[d] != null) dialogueTexts[d].text = "";
-            if (hintTexts[d] != null) hintTexts[d].text = "";
-        }
+        if (dialogueTexts[p] != null) dialogueTexts[p].text = "";
+        if (hintTexts[p] != null) hintTexts[p].text = "";
     }
 
-    void FinishTyping()
+    void FinishTyping(int p)
     {
-        isTyping = false;
-        typedChars = fullLineText.Length;
-        bool isLast = currentLine >= dialogueLines.Length - 1;
+        isTyping[p] = false;
+        string line = dialogueLines[currentLine[p]];
+        typedChars[p] = line.Length;
+        bool isLast = currentLine[p] >= dialogueLines.Length - 1;
         string hint = isLast ? "A  Terminer" : "A  Suivant  >";
 
-        for (int d = 0; d < 2; d++)
-        {
-            if (dialogueTexts[d] != null) dialogueTexts[d].text = fullLineText;
-            if (hintTexts[d] != null) hintTexts[d].text = hint;
-        }
+        if (dialogueTexts[p] != null) dialogueTexts[p].text = line;
+        if (hintTexts[p] != null) hintTexts[p].text = hint;
     }
 
-    void AdvanceDialogue()
+    void AdvanceDialogue(int p)
     {
-        currentLine++;
-        if (currentLine >= dialogueLines.Length)
+        currentLine[p]++;
+        if (currentLine[p] >= dialogueLines.Length)
         {
-            EnterReadyPhase();
+            EnterReadyForPlayer(p);
             return;
         }
-        ShowLine();
+        ShowLine(p);
     }
 
-    void EnterReadyPhase()
+    void EnterReadyForPlayer(int p)
     {
-        phase = Phase.Ready;
-        isJ1Ready = false;
-        isJ2Ready = false;
+        dialogueDone[p] = true;
 
-        for (int d = 0; d < 2; d++)
-        {
-            if (chiefImages[d] != null) chiefImages[d].gameObject.SetActive(false);
-            if (bubbleRoots[d] != null) bubbleRoots[d].SetActive(false);
-            readyPanels[d].SetActive(true);
-        }
+        if (chiefImages[p] != null) chiefImages[p].gameObject.SetActive(false);
+        if (bubbleRoots[p] != null) bubbleRoots[p].SetActive(false);
+        readyPanels[p].SetActive(true);
         UpdateReadyUI();
     }
 
@@ -402,43 +391,50 @@ public class TutorialReadySystem : MonoBehaviour
             if (recDots[d] != null)
                 recDots[d].color = new Color(1f, 0.15f, 0.15f, blinkAlpha);
 
-        // Typewriter tick
-        if (isTyping && fullLineText != null)
-        {
-            typeTimer += Time.unscaledDeltaTime;
-            while (typeTimer >= typeSpeed && typedChars < fullLineText.Length)
-            {
-                typedChars++;
-                typeTimer -= typeSpeed;
-            }
-            string visible = fullLineText.Substring(0, typedChars);
-            for (int d = 0; d < 2; d++)
-                if (dialogueTexts[d] != null) dialogueTexts[d].text = visible;
-
-            if (typedChars >= fullLineText.Length)
-                FinishTyping();
-        }
-
         InputDevice dev1 = GlobalPlayerManager.Instance != null ? GlobalPlayerManager.Instance.Player1Device : null;
         InputDevice dev2 = GlobalPlayerManager.Instance != null ? GlobalPlayerManager.Instance.Player2Device : null;
+        InputDevice[] devs = { dev1, dev2 };
 
-        if (phase == Phase.Dialogue)
+        for (int p = 0; p < 2; p++)
         {
-            bool pressed = WasButtonSouthPressed(dev1) || WasButtonSouthPressed(dev2);
-            if (pressed && isTyping)
-                FinishTyping();
-            else if (pressed && !isTyping)
-                AdvanceDialogue();
+            // Typewriter tick per player
+            if (isTyping[p] && !dialogueDone[p])
+            {
+                string line = dialogueLines[currentLine[p]];
+                typeTimer[p] += Time.unscaledDeltaTime;
+                while (typeTimer[p] >= typeSpeed && typedChars[p] < line.Length)
+                {
+                    typedChars[p]++;
+                    typeTimer[p] -= typeSpeed;
+                }
+                if (dialogueTexts[p] != null)
+                    dialogueTexts[p].text = line.Substring(0, typedChars[p]);
+
+                if (typedChars[p] >= line.Length)
+                    FinishTyping(p);
+            }
+
+            bool pressed = WasButtonSouthPressed(devs[p]);
+
+            if (!dialogueDone[p])
+            {
+                if (pressed && isTyping[p])
+                    FinishTyping(p);
+                else if (pressed && !isTyping[p])
+                    AdvanceDialogue(p);
+            }
+            else
+            {
+                if (p == 0 && !isJ1Ready && pressed) isJ1Ready = true;
+                if (p == 1 && !isJ2Ready && pressed) isJ2Ready = true;
+            }
         }
-        else
-        {
-            if (!isJ1Ready && WasButtonSouthPressed(dev1)) isJ1Ready = true;
-            if (!isJ2Ready && WasButtonSouthPressed(dev2)) isJ2Ready = true;
+
+        if (dialogueDone[0] || dialogueDone[1])
             UpdateReadyUI();
 
-            if (isJ1Ready && isJ2Ready)
-                StartCoroutine(StartGameRoutine());
-        }
+        if (isJ1Ready && isJ2Ready)
+            StartCoroutine(StartGameRoutine());
     }
 
     bool WasButtonSouthPressed(InputDevice device)

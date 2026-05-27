@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using System.Collections.Generic;
 
 public class WinManager : MonoBehaviour
 {
@@ -14,16 +15,52 @@ public class WinManager : MonoBehaviour
     // Scores statiques persistants
     public static int scoreJ1 = 0, scoreJ2 = 0;
 
-    // ── Meilleur score all-time (PlayerPrefs) ─────────────────────────
-    const string BEST_SCORE_KEY = "BestScore";
-    public static int  GetBestScore() => PlayerPrefs.GetInt(BEST_SCORE_KEY, 0);
-    public static void TrySaveBestScore(int score)
+    // ── Leaderboard (PlayerPrefs JSON) ──────────────────────────────
+    const string LEADERBOARD_KEY = "Leaderboard";
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    static void ClearLeaderboardOnStart()
     {
-        if (score > GetBestScore())
-        {
-            PlayerPrefs.SetInt(BEST_SCORE_KEY, score);
-            PlayerPrefs.Save();
-        }
+        PlayerPrefs.DeleteKey(LEADERBOARD_KEY);
+        PlayerPrefs.Save();
+    }
+    const int MAX_LEADERBOARD_ENTRIES = 20;
+
+    [System.Serializable]
+    public class LeaderboardEntry
+    {
+        public string pseudo;
+        public int score;
+    }
+
+    [System.Serializable]
+    class LeaderboardData
+    {
+        public List<LeaderboardEntry> entries = new List<LeaderboardEntry>();
+    }
+
+    public static List<LeaderboardEntry> GetLeaderboard()
+    {
+        string json = PlayerPrefs.GetString(LEADERBOARD_KEY, "");
+        if (string.IsNullOrEmpty(json))
+            return new List<LeaderboardEntry>();
+        var data = JsonUtility.FromJson<LeaderboardData>(json);
+        if (data == null || data.entries == null)
+            return new List<LeaderboardEntry>();
+        data.entries.Sort((a, b) => b.score.CompareTo(a.score));
+        return data.entries;
+    }
+
+    public static void AddLeaderboardEntry(string pseudo, int score)
+    {
+        var list = GetLeaderboard();
+        list.Add(new LeaderboardEntry { pseudo = pseudo, score = score });
+        list.Sort((a, b) => b.score.CompareTo(a.score));
+        if (list.Count > MAX_LEADERBOARD_ENTRIES)
+            list.RemoveRange(MAX_LEADERBOARD_ENTRIES, list.Count - MAX_LEADERBOARD_ENTRIES);
+        var data = new LeaderboardData { entries = list };
+        PlayerPrefs.SetString(LEADERBOARD_KEY, JsonUtility.ToJson(data));
+        PlayerPrefs.Save();
     }
 
     // Retour après minijeu

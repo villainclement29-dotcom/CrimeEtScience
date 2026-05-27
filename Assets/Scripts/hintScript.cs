@@ -3,7 +3,9 @@ using TMPro;
 
 public class HintObject : MonoBehaviour
 {
-    public string hintName; // Doit correspondre au texte UI
+    public string hintName;
+    [Tooltip("Nom affiche dans la liste UI (si vide, utilise hintName)")]
+    public string displayName;
     [HideInInspector] public TextMeshProUGUI linkedText;
 
     private bool isFound = false; // Sécurité pour ne compter qu'une seule fois

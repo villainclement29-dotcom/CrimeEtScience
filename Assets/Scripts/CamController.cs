@@ -103,7 +103,7 @@ public class PhotoCameraController : MonoBehaviour
         AssignTextsToIndices();
 
         // On compte combien de Textes TMP sont enfants de ce joueur pour définir l'objectif
-        totalHintsToFind = GetComponentsInChildren<TextMeshProUGUI>(true).Length;
+        totalHintsToFind = GetComponentsInChildren<TextMeshProUGUI>().Length;
         Debug.Log($"<color=orange>[J{playerId}] Objectif : {totalHintsToFind} indices à trouver.</color>");
     }
 
@@ -183,7 +183,7 @@ public class PhotoCameraController : MonoBehaviour
 
     void AssignTextsToIndices()
     {
-        TextMeshProUGUI[] allTexts = GetComponentsInChildren<TextMeshProUGUI>(true);
+        TextMeshProUGUI[] allTexts = GetComponentsInChildren<TextMeshProUGUI>();
         HintObject[] allIndices = Object.FindObjectsByType<HintObject>(FindObjectsSortMode.None);
 
         foreach (HintObject indice in allIndices)

@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.Video;
 using TMPro;
+using System.Collections.Generic;
 
 public class StartMenuController : MonoBehaviour
 {
@@ -354,13 +355,32 @@ public class StartMenuController : MonoBehaviour
     void RefreshLead(int p)
     {
         if (pLeaderTxt[p] == null) return;
-        int best = PlayerPrefs.GetInt("BestScore", 0);
-        string t = "<color=#FFD700>★ MEILLEUR SCORE ★</color>\n\n";
-        t += $"<size=48>{best} pts</size>\n\n";
-        t += "<color=#888>────────────────</color>\n\n";
-        t += "<color=#AAA>Dernière partie :</color>\n";
-        t += $"<color=#66CCFF>{PseudoJ1} : {WinManager.scoreJ1} pts</color>\n";
-        t += $"<color=#FF9933>{PseudoJ2} : {WinManager.scoreJ2} pts</color>";
+
+        List<WinManager.LeaderboardEntry> entries = WinManager.GetLeaderboard();
+
+        string t = "<color=#FFD700>★ LEADERBOARD ★</color>\n\n";
+
+        if (entries.Count == 0)
+        {
+            t += "<color=#888><i>Aucune partie enregistree</i></color>";
+        }
+        else
+        {
+            int shown = Mathf.Min(entries.Count, 10);
+            for (int i = 0; i < shown; i++)
+            {
+                string col;
+                switch (i)
+                {
+                    case 0: col = "#FFD700"; break;
+                    case 1: col = "#C0C0C0"; break;
+                    case 2: col = "#CD7F32"; break;
+                    default: col = "#FFFFFF"; break;
+                }
+                t += $"<color={col}>{i + 1}. {entries[i].pseudo}  —  {entries[i].score} pts</color>\n";
+            }
+        }
+
         pLeaderTxt[p].text = t;
     }
 

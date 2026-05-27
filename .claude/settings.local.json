@@ -47,7 +47,9 @@
       "Bash(xargs basename -a)",
       "Bash(Select-String -Path \"Assets\\\\Scenes\\\\tutos\\\\TutoMiniGame1.unity\" -Pattern \"m_Text:\")",
       "Bash(Select-Object -First 20)",
-      "PowerShell(Copy-Item *)"
+      "PowerShell(Copy-Item *)",
+      "mcp__ai-game-developer__gameobject-duplicate",
+      "mcp__ai-game-developer__gameobject-modify"
     ]
   },
   "enableAllProjectMcpServers": true,
