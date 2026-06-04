@@ -53,6 +53,7 @@ public class VideoTransitionHandler : MonoBehaviour
     private IEnumerator PlayVideosThenLoad(string sceneName)
     {
         isTransitioning = true;
+        GameTimer.Pause();
 
         // 1. Activer les deux arborescences
         videoContainer_D1.SetActive(true);
@@ -90,6 +91,7 @@ public class VideoTransitionHandler : MonoBehaviour
         }
 
         // 7. Changer de scène
+        GameTimer.Resume();
         SceneTransitionManager.LoadScene(sceneName);
     }
 }

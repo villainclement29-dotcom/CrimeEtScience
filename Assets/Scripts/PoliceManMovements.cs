@@ -54,9 +54,11 @@ namespace Cainos.PixelArtTopDown_Basic
             // --- LIAISON MANETTE ---
             if (playerInput != null && GlobalPlayerManager.Instance != null)
             {
-                InputDevice targetDevice = (playerId == 0) ?
-                    GlobalPlayerManager.Instance.Player1Device :
-                    GlobalPlayerManager.Instance.Player2Device;
+                InputDevice targetDevice = StartMenuController.IsSoloMode
+                    ? GlobalPlayerManager.Instance.Player1Device
+                    : (playerId == 0
+                        ? GlobalPlayerManager.Instance.Player1Device
+                        : GlobalPlayerManager.Instance.Player2Device);
 
                 if (targetDevice != null)
                 {

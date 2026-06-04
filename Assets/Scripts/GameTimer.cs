@@ -25,6 +25,7 @@ public class GameTimer : MonoBehaviour
     // ── État ─────────────────────────────────────────────────────────
     float remaining;
     bool  gameOver;
+    bool  paused;
 
     // ── UI chrono ────────────────────────────────────────────────────
     TextMeshProUGUI textJ1, textJ2;
@@ -80,7 +81,7 @@ public class GameTimer : MonoBehaviour
 
     void Update()
     {
-        if (gameOver) return;
+        if (gameOver || paused) return;
 
         remaining -= Time.deltaTime;
 
@@ -95,11 +96,15 @@ public class GameTimer : MonoBehaviour
 
     // ── API publique ─────────────────────────────────────────────────
 
+    public static void Pause()  { if (Instance != null) Instance.paused = true; }
+    public static void Resume() { if (Instance != null) Instance.paused = false; }
+
     public static void ResetAndStart()
     {
         if (Instance == null) return;
         Instance.remaining = Instance.totalTime;
         Instance.gameOver  = false;
+        Instance.paused    = false;
         Instance.HideOverlays();
     }
 
@@ -109,13 +114,11 @@ public class GameTimer : MonoBehaviour
         if (gameOver) return;
         gameOver = true;
 
-        // Bonus = secondes restantes offertes au joueur en tête
+        // Bonus = secondes restantes offertes aux deux joueurs
         int bonus = Mathf.RoundToInt(Mathf.Max(0f, remaining));
         remaining = 0f;
-        if (WinManager.scoreJ1 > WinManager.scoreJ2)
-            WinManager.scoreJ1 += bonus;
-        else if (WinManager.scoreJ2 > WinManager.scoreJ1)
-            WinManager.scoreJ2 += bonus;
+        WinManager.scoreJ1 += bonus;
+        WinManager.scoreJ2 += bonus;
 
         ShowEndOverlay(WinManager.scoreJ1, WinManager.scoreJ2);
         StartCoroutine(RedirectToStartMenu());
@@ -127,7 +130,8 @@ public class GameTimer : MonoBehaviour
 
         // Sauvegarde leaderboard
         WinManager.AddLeaderboardEntry(StartMenuController.PseudoJ1, WinManager.scoreJ1);
-        WinManager.AddLeaderboardEntry(StartMenuController.PseudoJ2, WinManager.scoreJ2);
+        if (!StartMenuController.IsSoloMode)
+            WinManager.AddLeaderboardEntry(StartMenuController.PseudoJ2, WinManager.scoreJ2);
 
         // Reset scores et pseudos
         WinManager.scoreJ1 = 0;
@@ -179,9 +183,15 @@ public class GameTimer : MonoBehaviour
     // ── Overlay fin de partie ────────────────────────────────────────
     void ShowEndOverlay(int scoreJ1, int scoreJ2)
     {
-        // Cache les chrono panels
         if (timerCanvasJ1) timerCanvasJ1.SetActive(false);
         if (timerCanvasJ2) timerCanvasJ2.SetActive(false);
+
+        if (StartMenuController.IsSoloMode)
+        {
+            string msg = $"FIN DE PARTIE\n\n{StartMenuController.PseudoJ1}\n\n{scoreJ1} pts";
+            overlayJ1 = BuildOverlayCanvas("EndOverlay_J1", targetDisplay: 0, msg, true);
+            return;
+        }
 
         string winner;
         if (scoreJ1 > scoreJ2)       winner = "Joueur 1 gagne !";
@@ -286,7 +296,8 @@ public class GameTimer : MonoBehaviour
     void CreateAllTimerUI()
     {
         textJ1 = BuildTimerCanvas("TimerCanvas_J1", targetDisplay: 0, out timerCanvasJ1);
-        textJ2 = BuildTimerCanvas("TimerCanvas_J2", targetDisplay: 1, out timerCanvasJ2);
+        if (!StartMenuController.IsSoloMode)
+            textJ2 = BuildTimerCanvas("TimerCanvas_J2", targetDisplay: 1, out timerCanvasJ2);
     }
 
     TextMeshProUGUI BuildTimerCanvas(string canvasName, int targetDisplay, out GameObject canvasGO)

@@ -49,7 +49,17 @@
       "Bash(Select-Object -First 20)",
       "PowerShell(Copy-Item *)",
       "mcp__ai-game-developer__gameobject-duplicate",
-      "mcp__ai-game-developer__gameobject-modify"
+      "mcp__ai-game-developer__gameobject-modify",
+      "PowerShell(npx unity-mcp-cli run-tool console-get-logs --input '{\"logTypeFilter\": \"Error\", \"lastMinutes\": 5}' 2>&1)",
+      "PowerShell($input = '{\"logTypeFilter\": \"Error\", \"lastMinutes\": 5}'; npx unity-mcp-cli run-tool console-get-logs --input $input 2>&1)",
+      "PowerShell($json = '{}'; npx unity-mcp-cli run-tool editor-application-get-state --input $json 2>&1)",
+      "PowerShell($json = '{\"logTypeFilter\": \"Error\", \"lastMinutes\": 10}'; npx unity-mcp-cli run-tool console-get-logs --input $json 2>&1)",
+      "PowerShell($inputJson = \"{`\"logTypeFilter`\": `\"Error`\", `\"lastMinutes`\": 10}\"; npx unity-mcp-cli run-tool console-get-logs --input $inputJson 2>&1)",
+      "PowerShell(echo '{\"logTypeFilter\": \"Error\", \"lastMinutes\": 10}' | npx unity-mcp-cli run-tool console-get-logs --input-file - 2>&1)",
+      "PowerShell(npx unity-mcp-cli run-tool console-get-logs --input-file \"C:\\\\Users\\\\villa\\\\AppData\\\\Local\\\\Temp\\\\unity_console_args.json\" 2>&1)",
+      "PowerShell(npx unity-mcp-cli run-tool assets-refresh --input-file \"C:\\\\Users\\\\villa\\\\AppData\\\\Local\\\\Temp\\\\unity_refresh_args.json\" 2>&1)",
+      "PowerShell(npx unity-mcp-cli run-tool scene-get-data --input-file \"C:\\\\Users\\\\villa\\\\AppData\\\\Local\\\\Temp\\\\scene_args.json\" 2>&1)",
+      "PowerShell(npx unity-mcp-cli run-tool scene-open --input-file \"C:\\\\Users\\\\villa\\\\AppData\\\\Local\\\\Temp\\\\open_scene_args.json\" 2>&1)"
     ]
   },
   "enableAllProjectMcpServers": true,

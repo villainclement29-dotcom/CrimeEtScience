@@ -17,7 +17,7 @@ public class StartMenuController : MonoBehaviour
     public int maxPseudoLength = 12;
 
     // ── État par joueur ───────────────────────────────────────────────
-    enum MenuState { Main, PseudoInput, Settings, Leaderboard }
+    enum MenuState { Main, ModeSelect, PseudoInput, Settings, Leaderboard }
     MenuState[] pState = { MenuState.Main, MenuState.Main };
     Gamepad[]   pPad   = new Gamepad[2];
 
@@ -69,6 +69,18 @@ public class StartMenuController : MonoBehaviour
     public static string PseudoJ1 = "Joueur 1";
     public static string PseudoJ2 = "Joueur 2";
 
+    // ── Mode de jeu ────────────────────────────────────────────────────
+    public static bool IsSoloMode = false;
+    public static UnityEngine.InputSystem.InputDevice SoloPlayerDevice = null;
+    static int _soloPlayerIndex = 0;
+
+    // ── Mode select (par joueur) ──────────────────────────────────────
+    int[]        pModeIdx   = new int[2];
+    bool[]       pModeStick = new bool[2];
+    Image[][]    pModeBtns  = new Image[2][];
+    GameObject[] pModePanel = new GameObject[2];
+    const int    MODE_COUNT = 2;
+
     // ── Couleurs ──────────────────────────────────────────────────────
     static readonly Color colBtn    = new Color(0.18f, 0.18f, 0.25f, 0.92f);
     static readonly Color colSel    = new Color(1f, 0.82f, 0f);
@@ -82,6 +94,8 @@ public class StartMenuController : MonoBehaviour
 
     void Start()
     {
+        IsSoloMode = false;
+        SoloPlayerDevice = null;
         if (Display.displays.Length > 1) Display.displays[1].Activate();
 
         SetupVideo();
@@ -118,14 +132,21 @@ public class StartMenuController : MonoBehaviour
 
             switch (pState[p])
             {
-                case MenuState.Main:        HandleMain(p);    break;
-                case MenuState.PseudoInput:  HandlePseudo(p);  break;
-                case MenuState.Settings:     HandleSet(p);     break;
-                case MenuState.Leaderboard:  HandleLead(p);    break;
+                case MenuState.Main:        HandleMain(p);       break;
+                case MenuState.ModeSelect:  HandleModeSelect(p); break;
+                case MenuState.PseudoInput:  HandlePseudo(p);    break;
+                case MenuState.Settings:     HandleSet(p);       break;
+                case MenuState.Leaderboard:  HandleLead(p);      break;
             }
         }
 
-        if (pState[0] == MenuState.PseudoInput && pState[1] == MenuState.PseudoInput
+        if (IsSoloMode && pState[_soloPlayerIndex] == MenuState.PseudoInput && kbDone[_soloPlayerIndex])
+        {
+            PseudoJ1 = kbTexts[_soloPlayerIndex].Length > 0 ? kbTexts[_soloPlayerIndex] : "Joueur 1";
+            PseudoJ2 = "Joueur 2";
+            SceneTransitionManager.LoadScene(lobbySceneName);
+        }
+        else if (!IsSoloMode && pState[0] == MenuState.PseudoInput && pState[1] == MenuState.PseudoInput
             && kbDone[0] && kbDone[1])
         {
             PseudoJ1 = kbTexts[0].Length > 0 ? kbTexts[0] : "Joueur 1";
@@ -151,7 +172,7 @@ public class StartMenuController : MonoBehaviour
         {
             switch (pMainIdx[p])
             {
-                case 0: ShowPlayerPseudo(p); break;
+                case 0: ShowPlayerModeSelect(p); break;
                 case 1: ShowPlayerSet(p);    break;
                 case 2: ShowPlayerLead(p);   break;
             }
@@ -299,6 +320,26 @@ public class StartMenuController : MonoBehaviour
             ShowPlayerMain(p);
     }
 
+    void HandleModeSelect(int p)
+    {
+        Gamepad gp = pPad[p];
+        if (gp.buttonEast.wasPressedThisFrame) { ShowPlayerMain(p); return; }
+
+        int nav = NavV(gp, ref pModeStick[p]);
+        if (nav != 0)
+        {
+            pModeIdx[p] = (pModeIdx[p] - nav + MODE_COUNT) % MODE_COUNT;
+            HL(pModeBtns[p], pModeIdx[p]);
+        }
+        if (gp.buttonSouth.wasPressedThisFrame)
+        {
+            IsSoloMode       = pModeIdx[p] == 0;
+            _soloPlayerIndex = p;
+            SoloPlayerDevice = pPad[p];
+            ShowPlayerPseudo(p);
+        }
+    }
+
     // ═══════════════════════════════════════════════════════════════════
     // INPUT HELPER
     // ═══════════════════════════════════════════════════════════════════
@@ -319,19 +360,29 @@ public class StartMenuController : MonoBehaviour
 
     void ShowPlayerMain(int p)
     {
+        if (IsSoloMode && _soloPlayerIndex == p) { IsSoloMode = false; SoloPlayerDevice = null; }
         pState[p] = MenuState.Main;
         pMainIdx[p] = 0; pMainStick[p] = false;
         GO(pMain[p], true); GO(pPseudo[p], false);
-        GO(pSettings[p], false); GO(pLeader[p], false);
+        GO(pModePanel[p], false); GO(pSettings[p], false); GO(pLeader[p], false);
         GO(kbConfirm[p], false);
         HL(pMainBtns[p], 0);
         kbRow[p] = 0; kbCol[p] = 0; kbTexts[p] = ""; kbDone[p] = false; kbStick[p] = false;
     }
 
+    void ShowPlayerModeSelect(int p)
+    {
+        pState[p] = MenuState.ModeSelect;
+        pModeIdx[p] = 0; pModeStick[p] = false;
+        GO(pMain[p], false);
+        GO(pModePanel[p], true);
+        HL(pModeBtns[p], 0);
+    }
+
     void ShowPlayerPseudo(int p)
     {
         pState[p] = MenuState.PseudoInput;
-        GO(pMain[p], false); GO(pPseudo[p], true);
+        GO(pMain[p], false); GO(pModePanel[p], false); GO(pPseudo[p], true);
         kbRow[p] = 0; kbCol[p] = 0; kbTexts[p] = ""; kbDone[p] = false;
         RefreshHL(p); RefreshDisp(p);
     }
@@ -433,10 +484,11 @@ public class StartMenuController : MonoBehaviour
 
         Color accent = p == 0 ? new Color(0.4f, 0.8f, 1f) : new Color(1f, 0.6f, 0.3f);
 
-        pMain[p]     = BuildMainPanel(go.transform, p, accent);
-        pPseudo[p]   = BuildPseudoPanel(go.transform, p, accent);
-        pSettings[p] = BuildSettingsPanel(go.transform, p);
-        pLeader[p]   = BuildLeaderboardPanel(go.transform, p);
+        pMain[p]      = BuildMainPanel(go.transform, p, accent);
+        pModePanel[p] = BuildModeSelectPanel(go.transform, p, accent);
+        pPseudo[p]    = BuildPseudoPanel(go.transform, p, accent);
+        pSettings[p]  = BuildSettingsPanel(go.transform, p);
+        pLeader[p]    = BuildLeaderboardPanel(go.transform, p);
 
         // Overlay « manette non connectée »
         var wGO = new GameObject("WaitOverlay");
@@ -463,12 +515,43 @@ public class StartMenuController : MonoBehaviour
         float bL = 0.30f, bR = 0.70f;
         pMainBtns[p] = new Image[MAIN_COUNT];
         int pi = p;
-        pMainBtns[p][0] = Btn(root.transform, "BtnJ", "JOUER",       V(bL, 0.44f), V(bR, 0.56f), colBtn, () => ShowPlayerPseudo(pi));
+        pMainBtns[p][0] = Btn(root.transform, "BtnJ", "JOUER",       V(bL, 0.44f), V(bR, 0.56f), colBtn, () => ShowPlayerModeSelect(pi));
         pMainBtns[p][1] = Btn(root.transform, "BtnP", "PARAMÈTRES",  V(bL, 0.30f), V(bR, 0.42f), colBtn, () => ShowPlayerSet(pi));
         pMainBtns[p][2] = Btn(root.transform, "BtnL", "LEADERBOARD", V(bL, 0.16f), V(bR, 0.28f), colBtn, () => ShowPlayerLead(pi));
 
         Lbl(root.transform, "H", "↑↓ Naviguer    A Confirmer",
             V(0.15f, 0.04f), V(0.85f, 0.12f), 18f, FontStyles.Normal, new Color(0.5f, 0.5f, 0.55f));
+        return root;
+    }
+
+    // ── MODE SELECT PANEL ─────────────────────────────────────────────
+
+    GameObject BuildModeSelectPanel(Transform parent, int p, Color accent)
+    {
+        var root = Pnl(parent, "ModeSelectPanel");
+        Img(root.transform, "Bg", new Color(0.03f, 0.03f, 0.06f), V(0, 0), V(1, 1));
+
+        Lbl(root.transform, "Title", "MODE DE JEU",
+            V(0.1f, 0.72f), V(0.9f, 0.92f), 72f, FontStyles.Bold, Color.white);
+        Lbl(root.transform, "Sub", $"Joueur {p + 1} — Choisissez un mode",
+            V(0.15f, 0.63f), V(0.85f, 0.72f), 28f, FontStyles.Normal, accent);
+
+        float bL = 0.25f, bR = 0.75f;
+        pModeBtns[p] = new Image[MODE_COUNT];
+        int pi = p;
+        pModeBtns[p][0] = Btn(root.transform, "BtnSolo", "SOLO",
+            V(bL, 0.46f), V(bR, 0.60f), colBtn, () => { IsSoloMode = true; _soloPlayerIndex = pi; SoloPlayerDevice = pPad[pi]; ShowPlayerPseudo(pi); });
+        pModeBtns[p][1] = Btn(root.transform, "BtnDuo",  "DUO  (2 joueurs)",
+            V(bL, 0.28f), V(bR, 0.42f), colBtn, () => { IsSoloMode = false; ShowPlayerPseudo(pi); });
+
+        Lbl(root.transform, "DescSolo", "Un seul joueur — Explorez seul",
+            V(0.25f, 0.40f), V(0.75f, 0.47f), 18f, FontStyles.Italic, new Color(0.5f, 0.5f, 0.55f));
+        Lbl(root.transform, "DescDuo", "Deux joueurs — Compétition",
+            V(0.25f, 0.22f), V(0.75f, 0.29f), 18f, FontStyles.Italic, new Color(0.5f, 0.5f, 0.55f));
+
+        Lbl(root.transform, "H", "↑↓ Naviguer    A Confirmer    B Retour",
+            V(0.15f, 0.04f), V(0.85f, 0.12f), 18f, FontStyles.Normal, new Color(0.5f, 0.5f, 0.55f));
+        root.SetActive(false);
         return root;
     }
 

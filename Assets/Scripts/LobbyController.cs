@@ -200,11 +200,13 @@ public class LobbyController : MonoBehaviour
         // ── Assignation par index de manette ─────────────────────────
         if (deviceJ1 == null)
         {
-            if (Gamepad.all.Count > 0)       deviceJ1 = Gamepad.all[0];
-            else if (Keyboard.current != null) deviceJ1 = Keyboard.current;
+            InputDevice soloDevice = StartMenuController.IsSoloMode ? StartMenuController.SoloPlayerDevice : null;
+            if (soloDevice != null)               deviceJ1 = soloDevice;
+            else if (Gamepad.all.Count > 0)       deviceJ1 = Gamepad.all[0];
+            else if (Keyboard.current != null)     deviceJ1 = Keyboard.current;
             if (deviceJ1 != null) ShowCarousel(1);
         }
-        if (deviceJ2 == null)
+        if (deviceJ2 == null && !StartMenuController.IsSoloMode)
         {
             if (Gamepad.all.Count > 1)                                          deviceJ2 = Gamepad.all[1];
             else if (deviceJ1 is Gamepad && Keyboard.current != null)           deviceJ2 = Keyboard.current;
@@ -523,7 +525,8 @@ public class LobbyController : MonoBehaviour
         }
         UpdateLabels(other);
 
-        if (selectedJ1 && selectedJ2 && !loadingStarted)
+        bool bothReady = StartMenuController.IsSoloMode ? selectedJ1 : (selectedJ1 && selectedJ2);
+        if (bothReady && !loadingStarted)
         {
             loadingStarted = true;
             if (carouselRootJ1 != null) carouselRootJ1.SetActive(false);
@@ -531,7 +534,8 @@ public class LobbyController : MonoBehaviour
             if (GlobalPlayerManager.Instance != null)
             {
                 GlobalPlayerManager.Instance.AssignPlayer(0, deviceJ1);
-                GlobalPlayerManager.Instance.AssignPlayer(1, deviceJ2);
+                if (!StartMenuController.IsSoloMode)
+                    GlobalPlayerManager.Instance.AssignPlayer(1, deviceJ2);
             }
             StartCoroutine(PlayVideosAndLoad());
         }
@@ -566,29 +570,35 @@ public class LobbyController : MonoBehaviour
 
     IEnumerator PlayVideosAndLoad()
     {
-        if (videoPlayer_D1 == null || videoPlayer_D2 == null)
+        bool solo = StartMenuController.IsSoloMode;
+
+        if (videoPlayer_D1 == null || (!solo && videoPlayer_D2 == null))
         {
             SceneTransitionManager.LoadScene(nextSceneName);
             yield break;
         }
 
         videoContainer_D1.SetActive(true);
-        videoContainer_D2.SetActive(true);
         videoPlayer_D1.gameObject.SetActive(true);
-        videoPlayer_D2.gameObject.SetActive(true);
-
         videoPlayer_D1.Prepare();
-        videoPlayer_D2.Prepare();
 
-        while (!videoPlayer_D1.isPrepared || !videoPlayer_D2.isPrepared) yield return null;
+        if (!solo && videoContainer_D2 != null)
+        {
+            videoContainer_D2.SetActive(true);
+            videoPlayer_D2.gameObject.SetActive(true);
+            videoPlayer_D2.Prepare();
+        }
+
+        if (solo) { while (!videoPlayer_D1.isPrepared) yield return null; }
+        else      { while (!videoPlayer_D1.isPrepared || !videoPlayer_D2.isPrepared) yield return null; }
 
         videoDisplay_D1.texture = videoPlayer_D1.texture;
-        videoDisplay_D2.texture = videoPlayer_D2.texture;
+        if (!solo && videoDisplay_D2 != null) videoDisplay_D2.texture = videoPlayer_D2.texture;
 
         SceneMusicPlayer smp = Object.FindFirstObjectByType<SceneMusicPlayer>();
         if (smp != null) smp.FadeOut(0.5f);
         videoPlayer_D1.Play();
-        videoPlayer_D2.Play();
+        if (!solo) videoPlayer_D2.Play();
 
         yield return new WaitForSeconds(0.5f);
         while (videoPlayer_D1.isPlaying) yield return null;

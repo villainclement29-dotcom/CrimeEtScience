@@ -49,6 +49,8 @@ public class TutorialReadySystem : MonoBehaviour
         dialogueCreated = true;
         primary = this;
 
+        GameTimer.Pause();
+
         SetDialogueForScene(SceneManager.GetActiveScene().name);
         LoadChiefSprite();
         HideExistingTutoUI();
@@ -448,6 +450,7 @@ public class TutorialReadySystem : MonoBehaviour
     {
         isStarting = true;
         yield return new WaitForSeconds(delayAfterReady);
+        GameTimer.Resume();
         SceneTransitionManager.LoadScene(nextSceneName);
     }
 
